@@ -6,12 +6,14 @@ export interface Layout {
   input: HTMLInputElement;
   message: HTMLElement;
   list: HTMLUListElement;
+  warning: HTMLElement;
 }
 
 const FORM_ID = 'add-task';
 const INPUT_ID = 'task-title';
 const MESSAGE_ID = 'task-title-message';
 const LIST_ID = 'task-list';
+const WARNING_ID = 'storage-warning';
 
 /** The form and the list, created once so the title field keeps its focus and value. */
 export function ensureLayout(root: HTMLElement): Layout {
@@ -22,6 +24,7 @@ export function ensureLayout(root: HTMLElement): Layout {
       input: root.querySelector<HTMLInputElement>(`#${INPUT_ID}`)!,
       message: root.querySelector<HTMLElement>(`#${MESSAGE_ID}`)!,
       list: root.querySelector<HTMLUListElement>(`#${LIST_ID}`)!,
+      warning: root.querySelector<HTMLElement>(`#${WARNING_ID}`)!,
     };
   }
 
@@ -54,13 +57,19 @@ export function ensureLayout(root: HTMLElement): Layout {
   list.id = LIST_ID;
   list.setAttribute('aria-label', 'Tasks');
 
-  root.append(form, list);
-  return { form, input, message, list };
+  // Present from the start, so that assistive technology announces the text when it appears.
+  const warning = document.createElement('p');
+  warning.id = WARNING_ID;
+  warning.setAttribute('role', 'alert');
+
+  root.append(warning, form, list);
+  return { form, input, message, list, warning };
 }
 
 export function render(root: HTMLElement, state: AppState): void {
-  const { message, list } = ensureLayout(root);
+  const { message, list, warning } = ensureLayout(root);
   message.textContent = state.validationMessage ?? '';
+  warning.textContent = state.storageWarning ?? '';
   list.replaceChildren(...state.tasks.map(taskItem));
 }
 
