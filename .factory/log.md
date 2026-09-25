@@ -1,0 +1,5 @@
+2026-09-25T08:11:50Z S00 001-initial intake
+2026-09-25T08:29:23Z S02 001-initial requirements REQ-001..REQ-021
+2026-09-25T08:31:15Z S03 001-initial architecture
+2026-09-25T08:32:49Z S04 001-initial plan
+2026-09-25T08:36:29Z S05 001-initial stories STORY-001..STORY-012
