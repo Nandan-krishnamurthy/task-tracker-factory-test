@@ -50,7 +50,7 @@ M1 skeleton ─► M1 add task ─► M2 persistence ─┬─► M3 due date/pr
 
 ## Testing approach
 
-`.factory/config.json` has every command set to `null` today. The walking-skeleton story (STORY-001) introduces the npm scripts and records the real commands in `commands`. Until then, no gate command exists, and none is guessed (rule H4). The planned scripts are `npm run build`, `npm run typecheck` and `npm test` (unit and end-to-end), with `npm ci` plus the Playwright browser install as `install`. STORY-001 confirms the exact commands by running them.
+`.factory/config.json` has every command set to `null` today. The walking-skeleton story (the first story of M1) introduces the npm scripts and records the real commands in `commands`. Until then, no gate command exists, and none is guessed (rule H4). The planned scripts are `npm run build`, `npm run typecheck` and `npm test` (unit and end-to-end), with `npm ci` plus the Playwright browser install as `install`. That story confirms the exact commands by running them.
 
 | Kind of requirement | Test level | Runner |
 |---|---|---|
@@ -94,7 +94,7 @@ Every story adds its own tests. No story deletes or weakens an earlier test.
 
 ## Risks
 
-- **Playwright needs a browser download** (about 150 MB for Chromium) on the machine that runs the tests. *Mitigation:* STORY-001 records the install step in `commands.install`. If the install fails, the story stops and asks (rule H6) rather than dropping the end-to-end tests.
+- **Playwright needs a browser download** (about 150 MB for Chromium) on the machine that runs the tests. *Mitigation:* the walking-skeleton story records the install step in `commands.install`. If the install fails, the story stops and asks (rule H6) rather than dropping the end-to-end tests.
 - **The walking skeleton is the biggest story, because of generated config and the lock file.** *Mitigation:* keep it to the minimum scaffold. `package-lock.json` is generated, and the PR says so, so that the reviewable diff stays small.
 - **The 100 ms latency check can be flaky on a slow or busy machine.** *Mitigation:* measure the time from action to DOM update inside the page (not wall-clock across processes), use the median of several runs, and seed a realistic 500 tasks.
 - **Accessibility gaps found late in M6.** *Mitigation:* every story uses native controls with labels from the start, and M6 is an audit plus fixes, not a rewrite.
