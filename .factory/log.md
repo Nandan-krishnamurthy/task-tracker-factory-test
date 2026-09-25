@@ -4,3 +4,4 @@
 2026-09-25T08:32:49Z S04 001-initial plan
 2026-09-25T08:36:29Z S05 001-initial stories STORY-001..STORY-012
 2026-09-25T11:21:50Z S07 001-initial #2 branch story/2-walking-skeleton
+2026-09-25T11:25:47Z S08 001-initial #2 implement
