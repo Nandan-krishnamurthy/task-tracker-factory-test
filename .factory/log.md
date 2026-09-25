@@ -21,3 +21,4 @@
 2026-09-25T15:14:41Z S11 001-initial #5 PR #17
 2026-09-25T15:29:39Z S07 001-initial #6 branch story/6-due-date-and-priority
 2026-09-25T15:31:37Z S08 001-initial #6 implement
+2026-09-25T15:33:11Z S09 001-initial #6 tests pass (vitest 61 passed, playwright 25 passed; build+typecheck OK; lint skipped)
