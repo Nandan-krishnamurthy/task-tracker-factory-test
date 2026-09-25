@@ -4,7 +4,11 @@ import { saveTasks } from '../storage/taskStore';
 export interface AppState {
   readonly tasks: readonly Task[];
   readonly validationMessage: string | null;
+  /** Set while the last save failed: the tasks are shown but may not be stored. */
+  readonly storageWarning?: string;
 }
+
+export const SAVE_WARNING = 'Your changes may not be saved: this browser could not store them.';
 
 export interface ControllerDeps {
   /** The tasks loaded at start, in creation order. */
@@ -25,9 +29,11 @@ export function createController({ tasks, storage, render, now, newId }: Control
   let current: AppState = { tasks, validationMessage: null };
 
   // The single save path: every change to the tasks is saved before rendering (REQ-013).
+  // A failed save keeps the change in memory and shows a warning until a save succeeds.
   function update(next: AppState): void {
     if (next.tasks !== current.tasks) {
-      saveTasks(storage, next.tasks);
+      const saved = saveTasks(storage, next.tasks);
+      next = { ...next, storageWarning: saved.ok ? undefined : SAVE_WARNING };
     }
     current = next;
     render(current);

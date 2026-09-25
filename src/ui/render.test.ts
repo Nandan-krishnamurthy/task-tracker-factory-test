@@ -36,6 +36,18 @@ describe('render', () => {
     expect(item.querySelector('b')).toBeNull();
   });
 
+  it('#5 AC3: shows the storage warning in an alert region, and empties it when cleared', () => {
+    render(root, { tasks: [], validationMessage: null });
+    const warning = root.querySelector('#storage-warning')!;
+    expect(warning.getAttribute('role')).toBe('alert');
+    expect(warning.textContent).toBe('');
+    render(root, { tasks: [], validationMessage: null, storageWarning: 'May not be saved.' });
+    expect(root.querySelector('#storage-warning')).toBe(warning); // same live region
+    expect(warning.textContent).toBe('May not be saved.');
+    render(root, { tasks: [], validationMessage: null });
+    expect(warning.textContent).toBe('');
+  });
+
   it('#3 AC2: re-rendering keeps the same form, so the field keeps its focus', () => {
     const first = ensureLayout(root).form;
     render(root, { tasks: [], validationMessage: 'x' });
