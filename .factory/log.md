@@ -11,3 +11,7 @@
 2026-09-25T13:00:51Z S08 001-initial #3 implement
 2026-09-25T13:06:26Z S09 001-initial #3 tests pass (vitest 15 passed, playwright 8 passed; build+typecheck OK; lint skipped; first cold run: jsdom worker start timeout, passed on rerun without changes)
 2026-09-25T13:10:53Z S11 001-initial #3 PR #15
+2026-09-25T13:49:26Z S07 001-initial #4 branch story/4-save-and-restore-tasks
+2026-09-25T13:53:22Z S08 001-initial #4 implement
+2026-09-25T13:55:28Z S09 001-initial #4 tests pass (vitest 23 passed, playwright 12 passed; build+typecheck OK; lint skipped)
+2026-09-25T13:59:54Z S11 001-initial #4 PR #16

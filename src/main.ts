@@ -1,6 +1,7 @@
 import { createController } from './app/controller';
 import { newId } from './app/ids';
 import { APP_TITLE } from './app/title';
+import { loadTasks } from './storage/taskStore';
 import { bindEvents } from './ui/events';
 import { render } from './ui/render';
 
@@ -15,6 +16,8 @@ const main = document.createElement('main');
 root.replaceChildren(heading, main);
 
 const controller = createController({
+  tasks: loadTasks(localStorage).tasks,
+  storage: localStorage,
   render: (state) => render(main, state),
   now: () => new Date(),
   newId,
