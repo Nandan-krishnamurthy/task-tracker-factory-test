@@ -47,6 +47,8 @@ describe('render', () => {
 describe('bindEvents', () => {
   it('#3 AC2: submitting adds the task and clears the field', () => {
     const controller = createController({
+      tasks: [],
+      storage: { setItem: () => {} },
       render: (state) => render(root, state),
       now: () => new Date(),
       newId: () => 'a',

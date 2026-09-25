@@ -6,6 +6,8 @@ function setup() {
   const render = vi.fn<(state: AppState) => void>();
   let n = 0;
   const controller = createController({
+    tasks: [],
+    storage: { setItem: vi.fn() },
     render,
     now: () => new Date('2026-09-25T08:00:00.000Z'),
     newId: () => `id-${++n}`,

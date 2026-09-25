@@ -1,4 +1,5 @@
 import { createTask, type Task } from '../domain/task';
+import { saveTasks } from '../storage/taskStore';
 
 export interface AppState {
   readonly tasks: readonly Task[];
@@ -6,6 +7,9 @@ export interface AppState {
 }
 
 export interface ControllerDeps {
+  /** The tasks loaded at start, in creation order. */
+  tasks: readonly Task[];
+  storage: Pick<Storage, 'setItem'>;
   render: (state: AppState) => void;
   now: () => Date;
   newId: () => string;
@@ -17,10 +21,14 @@ export interface Controller {
   state(): AppState;
 }
 
-export function createController({ render, now, newId }: ControllerDeps): Controller {
-  let current: AppState = { tasks: [], validationMessage: null };
+export function createController({ tasks, storage, render, now, newId }: ControllerDeps): Controller {
+  let current: AppState = { tasks, validationMessage: null };
 
+  // The single save path: every change to the tasks is saved before rendering (REQ-013).
   function update(next: AppState): void {
+    if (next.tasks !== current.tasks) {
+      saveTasks(storage, next.tasks);
+    }
     current = next;
     render(current);
   }
