@@ -25,7 +25,7 @@ Status is one of: `Not started`, `In progress`, `Implemented`, `Deferred`.
 | REQ-015 | STORY-002 | — | — | Not started |
 | REQ-016 | STORY-011 | — | — | Not started |
 | REQ-017 | STORY-011 | — | — | Not started |
-| REQ-018 | STORY-001, STORY-012 | — | — | Not started |
+| REQ-018 | STORY-001 (#2), STORY-012 | #14 | `#2 AC3 AC4: shows the heading and requests only its own files` | In progress |
 | REQ-019 | STORY-012 | — | — | Not started |
 | REQ-020 | STORY-004 | — | — | Not started |
-| REQ-021 | STORY-001 | — | — | Not started |
+| REQ-021 | STORY-001 (#2) | #14 | `#2 AC1: the build writes index.html and its assets to dist/`; `#2 AC3 AC4: shows the heading and requests only its own files` | Implemented |
