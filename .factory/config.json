@@ -5,11 +5,11 @@
   "default_branch": "main",
   "reviewers": ["Nandan-krishnamurthy"],
   "commands": {
-    "install": null,
-    "build": null,
+    "install": "npm ci && npx playwright install chromium",
+    "build": "npm run build",
     "lint": null,
-    "typecheck": null,
-    "test": null
+    "typecheck": "npm run typecheck",
+    "test": "npm test"
   },
   "limits": {
     "max_fix_attempts": 3,
