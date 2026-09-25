@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TITLE_REQUIRED } from '../domain/task';
 import { loadTasks, STORAGE_KEY } from '../storage/taskStore';
-import { createController, type AppState } from './controller';
+import { createController, SAVE_WARNING, type AppState } from './controller';
 
 function setup() {
   const render = vi.fn<(state: AppState) => void>();
@@ -85,5 +85,44 @@ describe('controller persistence', () => {
 
   it('#4 AC4: with nothing stored, the controller starts with an empty list and no message', () => {
     expect(persistent().controller.state()).toEqual({ tasks: [], validationMessage: null });
+  });
+});
+
+describe('controller when saving fails', () => {
+  function failing() {
+    let fail = true;
+    const storage = {
+      setItem: () => {
+        if (fail) throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+      },
+    };
+    const render = vi.fn<(state: AppState) => void>();
+    const controller = createController({
+      tasks: [],
+      storage,
+      render,
+      now: () => new Date('2026-09-25T08:00:00.000Z'),
+      newId: () => 'id-1',
+    });
+    return { controller, render, recover: () => (fail = false) };
+  }
+
+  it('#5 AC3: the task is still added and shown, with the storage warning', () => {
+    const { controller, render } = failing();
+    expect(controller.addTask('Buy milk')).toBe(true);
+    expect(controller.state().tasks.map((t) => t.title)).toEqual(['Buy milk']);
+    expect(controller.state().storageWarning).toBe(SAVE_WARNING);
+    expect(render).toHaveBeenLastCalledWith(controller.state());
+  });
+
+  it('#5 AC3: the warning stays through a validation error and clears after a good save', () => {
+    const { controller, recover } = failing();
+    controller.addTask('Buy milk');
+    controller.addTask('  ');
+    expect(controller.state().storageWarning).toBe(SAVE_WARNING);
+    recover();
+    controller.addTask('Walk dog');
+    expect(controller.state().storageWarning).toBeUndefined();
+    expect(controller.state().tasks).toHaveLength(2);
   });
 });
