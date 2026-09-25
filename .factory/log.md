@@ -13,3 +13,4 @@
 2026-09-25T13:10:53Z S11 001-initial #3 PR #15
 2026-09-25T13:49:26Z S07 001-initial #4 branch story/4-save-and-restore-tasks
 2026-09-25T13:53:22Z S08 001-initial #4 implement
+2026-09-25T13:55:28Z S09 001-initial #4 tests pass (vitest 23 passed, playwright 12 passed; build+typecheck OK; lint skipped)
