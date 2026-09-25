@@ -18,3 +18,4 @@
 2026-09-25T15:08:15Z S07 001-initial #5 branch story/5-survive-corrupted-storage
 2026-09-25T15:09:57Z S08 001-initial #5 implement
 2026-09-25T15:11:36Z S09 001-initial #5 tests pass (vitest 50 passed, playwright 18 passed; build+typecheck OK; lint skipped)
+2026-09-25T15:14:41Z S11 001-initial #5 PR #17
