@@ -10,8 +10,8 @@ Status is one of: `Not started`, `In progress`, `Implemented`, `Deferred`.
 |---|---|---|---|---|
 | REQ-001 | STORY-002 (#3) | #15 | `#3 AC2: Enter adds the task without a reload and clears the field`; `#3 AC2: the Add button adds the task too`; `#3 AC2: appends in creation order with the injected id and time` | Implemented |
 | REQ-002 | STORY-002 (#3) | #15 | `#3 AC3: an empty or whitespace-only title adds nothing and shows a message`; `#3 AC4: the message disappears after a valid title is added`; `#3 AC5: shows the trimmed title`; `#3 AC3: rejects a whitespace-only title` | Implemented |
-| REQ-003 | STORY-005 | — | — | Not started |
-| REQ-004 | STORY-005 | — | — | Not started |
+| REQ-003 | STORY-005 (#6) | #18 | `#6 AC1: a task added with a due date shows that date`; `#6 AC3: a task added with neither shows neither`; `#6 AC4: due date and priority are unchanged after a reload`; `#6 AC1: rejects a due date that is not a calendar day` | Implemented |
+| REQ-004 | STORY-005 (#6) | #18 | `#6 AC2: a task added with priority Low/Medium/High shows that priority`; `#6 AC3: a task added with neither shows neither`; `#6 AC5: the priority choices are only none, Low, Medium and High`; `#6 AC2: rejects a priority that is not low, medium or high` | Implemented |
 | REQ-005 | STORY-007 | — | — | Not started |
 | REQ-006 | STORY-007 | — | — | Not started |
 | REQ-007 | STORY-007 | — | — | Not started |
