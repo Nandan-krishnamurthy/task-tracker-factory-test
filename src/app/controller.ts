@@ -1,4 +1,4 @@
-import { createTask, type Task } from '../domain/task';
+import { createTask, type NewTask, type Task } from '../domain/task';
 import { saveTasks } from '../storage/taskStore';
 
 export interface AppState {
@@ -20,8 +20,8 @@ export interface ControllerDeps {
 }
 
 export interface Controller {
-  /** Adds a task; returns false (and sets the validation message) if the title is invalid. */
-  addTask(title: string): boolean;
+  /** Adds a task; returns false (and sets the validation message) if the input is invalid. */
+  addTask(title: string, details?: Omit<NewTask, 'title'>): boolean;
   state(): AppState;
 }
 
@@ -40,8 +40,8 @@ export function createController({ tasks, storage, render, now, newId }: Control
   }
 
   return {
-    addTask(title) {
-      const result = createTask(current.tasks, { title }, now(), newId);
+    addTask(title, details = {}) {
+      const result = createTask(current.tasks, { ...details, title }, now(), newId);
       if (!result.ok) {
         update({ ...current, validationMessage: result.error });
         return false;

@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { createTask, TITLE_REQUIRED, validateTitle, type Task } from './task';
+import {
+  createTask,
+  INVALID_DUE_DATE,
+  INVALID_PRIORITY,
+  isCalendarDate,
+  TITLE_REQUIRED,
+  validateTitle,
+  type Task,
+} from './task';
 
 const NOW = new Date('2026-09-25T08:00:00.000Z');
 const ids = (...values: string[]) => () => values.shift() ?? 'unexpected';
@@ -51,5 +59,52 @@ describe('createTask', () => {
       error: TITLE_REQUIRED,
     });
     expect(tasks).toEqual([]);
+  });
+});
+
+describe('createTask with a due date and a priority', () => {
+  it('#6 AC1 AC2: keeps the given due date and priority', () => {
+    const result = createTask(
+      [],
+      { title: 'Pay rent', dueDate: '2026-10-01', priority: 'high' },
+      NOW,
+      ids('a'),
+    );
+    expect(result.ok && [result.task.dueDate, result.task.priority]).toEqual(['2026-10-01', 'high']);
+  });
+
+  it('#6 AC2: accepts each of low, medium and high', () => {
+    for (const priority of ['low', 'medium', 'high']) {
+      const result = createTask([], { title: 'x', priority }, NOW, ids('a'));
+      expect(result.ok && result.task.priority).toBe(priority);
+    }
+  });
+
+  it('#6 AC3: an empty or missing due date and priority give none', () => {
+    for (const input of [{ title: 'x' }, { title: 'x', dueDate: '', priority: '' }]) {
+      const result = createTask([], input, NOW, ids('a'));
+      expect(result.ok && [result.task.dueDate, result.task.priority]).toEqual([null, null]);
+    }
+  });
+
+  it('#6 AC2: rejects a priority that is not low, medium or high', () => {
+    expect(createTask([], { title: 'x', priority: 'urgent' }, NOW, ids('a'))).toEqual({
+      ok: false,
+      error: INVALID_PRIORITY,
+    });
+  });
+
+  it('#6 AC1: rejects a due date that is not a calendar day', () => {
+    for (const dueDate of ['01/10/2026', '2026-02-30', '2026-1-1']) {
+      expect(createTask([], { title: 'x', dueDate }, NOW, ids('a'))).toEqual({
+        ok: false,
+        error: INVALID_DUE_DATE,
+      });
+    }
+  });
+
+  it('#6 AC1: any real calendar day is allowed, including past dates', () => {
+    expect(isCalendarDate('2020-02-29')).toBe(true);
+    expect(isCalendarDate('2021-02-29')).toBe(false);
   });
 });

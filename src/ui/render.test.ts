@@ -36,6 +36,58 @@ describe('render', () => {
     expect(item.querySelector('b')).toBeNull();
   });
 
+  it('#6 AC5: the priority control offers exactly none, Low, Medium and High, and is labelled', () => {
+    render(root, { tasks: [], validationMessage: null });
+    const select = root.querySelector<HTMLSelectElement>('select#task-priority')!;
+    expect(root.querySelector(`label[for="${select.id}"]`)!.textContent).toBe('Priority');
+    expect([...select.options].map((o) => [o.value, o.text])).toEqual([
+      ['', 'No priority'],
+      ['low', 'Low'],
+      ['medium', 'Medium'],
+      ['high', 'High'],
+    ]);
+    expect(select.value).toBe('');
+  });
+
+  it('#6 AC1: the due date field is a labelled date input', () => {
+    render(root, { tasks: [], validationMessage: null });
+    const input = root.querySelector<HTMLInputElement>('input#task-due-date')!;
+    expect(input.type).toBe('date');
+    expect(root.querySelector(`label[for="${input.id}"]`)!.textContent).toBe('Due date');
+  });
+
+  it('#6 AC1 AC2: a task shows its due date and priority', () => {
+    const task = {
+      id: 'a',
+      title: 'Pay rent',
+      dueDate: '2026-10-01',
+      priority: 'high' as const,
+      completed: false,
+      createdAt: '',
+    };
+    render(root, { tasks: [task], validationMessage: null });
+    const item = root.querySelector('#task-list li')!;
+    const due = item.querySelector('time')!;
+    expect(due.dateTime).toBe('2026-10-01');
+    expect(due.textContent).toMatch(/^Due .*2026/);
+    expect(item.querySelector('.task-priority')!.textContent).toBe('High priority');
+  });
+
+  it('#6 AC3: a task without a due date or priority shows only its title', () => {
+    const task = {
+      id: 'a',
+      title: 'Walk dog',
+      dueDate: null,
+      priority: null,
+      completed: false,
+      createdAt: '',
+    };
+    render(root, { tasks: [task], validationMessage: null });
+    const item = root.querySelector('#task-list li')!;
+    expect(item.textContent).toBe('Walk dog');
+    expect(item.querySelector('time, .task-priority')).toBeNull();
+  });
+
   it('#5 AC3: shows the storage warning in an alert region, and empties it when cleared', () => {
     render(root, { tasks: [], validationMessage: null });
     const warning = root.querySelector('#storage-warning')!;
@@ -72,5 +124,25 @@ describe('bindEvents', () => {
     form.requestSubmit();
     expect(list.textContent).toBe('Buy milk');
     expect(input.value).toBe('');
+  });
+
+  it('#6 AC1 AC2: the date and priority are passed on, then reset with the title', () => {
+    const controller = createController({
+      tasks: [],
+      storage: { setItem: () => {} },
+      render: (state) => render(root, state),
+      now: () => new Date(),
+      newId: () => 'a',
+    });
+    render(root, controller.state());
+    bindEvents(root, controller);
+    const { form, input, dueDate, priority } = ensureLayout(root);
+    input.value = 'Pay rent';
+    dueDate.value = '2026-10-01';
+    priority.value = 'medium';
+    form.requestSubmit();
+    const [task] = controller.state().tasks;
+    expect([task.dueDate, task.priority]).toEqual(['2026-10-01', 'medium']);
+    expect([input.value, dueDate.value, priority.value]).toEqual(['', '', '']);
   });
 });
