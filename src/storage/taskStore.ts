@@ -1,4 +1,4 @@
-import type { Priority, Task } from '../domain/task';
+import { isCalendarDate, isPriority, type Task } from '../domain/task';
 
 /** The one localStorage key the app uses (03-architecture.md §Data model). */
 export const STORAGE_KEY = 'task-tracker:v1';
@@ -9,9 +9,6 @@ export interface StoredData {
 }
 
 export type SaveResult = { ok: true } | { ok: false; error: string };
-
-const PRIORITIES: readonly Priority[] = ['low', 'medium', 'high'];
-const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export function encodeTasks(tasks: readonly Task[]): string {
   const data: StoredData = { version: 1, tasks: [...tasks] };
@@ -78,22 +75,9 @@ function isTask(value: unknown): value is Task {
     value.title.length > 0 &&
     value.title === value.title.trim() &&
     (value.dueDate === null || isCalendarDate(value.dueDate)) &&
-    (value.priority === null || PRIORITIES.includes(value.priority as Priority)) &&
+    (value.priority === null || isPriority(value.priority)) &&
     typeof value.completed === 'boolean' &&
     typeof value.createdAt === 'string' &&
     !Number.isNaN(Date.parse(value.createdAt))
-  );
-}
-
-/** A real calendar day as `YYYY-MM-DD` (so `2026-02-30` is rejected). */
-function isCalendarDate(value: unknown): boolean {
-  const match = typeof value === 'string' ? DATE.exec(value) : null;
-  if (!match) {
-    return false;
-  }
-  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return (
-    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
   );
 }
