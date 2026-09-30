@@ -1,9 +1,12 @@
-import { createTask, type NewTask, type Task } from '../domain/task';
+import type { View } from '../domain/filter';
+import { createTask, setCompleted, type NewTask, type Task } from '../domain/task';
 import { saveTasks } from '../storage/taskStore';
 
 export interface AppState {
   readonly tasks: readonly Task[];
   readonly validationMessage: string | null;
+  /** The view shown (REQ-007). Absent means Active. */
+  readonly view?: View;
   /** Set while the last save failed: the tasks are shown but may not be stored. */
   readonly storageWarning?: string;
 }
@@ -22,11 +25,16 @@ export interface ControllerDeps {
 export interface Controller {
   /** Adds a task; returns false (and sets the validation message) if the input is invalid. */
   addTask(title: string, details?: Omit<NewTask, 'title'>): boolean;
+  /** Marks a task done or not done (REQ-005, REQ-006). */
+  toggleTask(id: string, completed: boolean): void;
+  /** Shows the Active or the Completed tasks (REQ-007). */
+  setView(view: View): void;
   state(): AppState;
 }
 
 export function createController({ tasks, storage, render, now, newId }: ControllerDeps): Controller {
-  let current: AppState = { tasks, validationMessage: null };
+  // The app always opens on Active; the view is not stored.
+  let current: AppState = { tasks, validationMessage: null, view: 'active' };
 
   // The single save path: every change to the tasks is saved before rendering (REQ-013).
   // A failed save keeps the change in memory and shows a warning until a save succeeds.
@@ -46,8 +54,15 @@ export function createController({ tasks, storage, render, now, newId }: Control
         update({ ...current, validationMessage: result.error });
         return false;
       }
-      update({ tasks: result.tasks, validationMessage: null });
+      // Switch to Active, so the new task is visible.
+      update({ ...current, tasks: result.tasks, validationMessage: null, view: 'active' });
       return true;
+    },
+    toggleTask(id, completed) {
+      update({ ...current, tasks: setCompleted(current.tasks, id, completed) });
+    },
+    setView(view) {
+      update({ ...current, view });
     },
     state: () => current,
   };

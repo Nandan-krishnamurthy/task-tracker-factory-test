@@ -28,3 +28,4 @@
 2026-09-30T12:42:05Z S09 001-initial #7 tests pass (vitest 70 passed, playwright 30 passed; build+typecheck OK; lint skipped)
 2026-09-30T12:45:37Z S11 001-initial #7 PR #19
 2026-09-30T12:52:31Z S07 001-initial #8 branch story/8-complete-and-reopen-tasks
+2026-09-30T12:55:22Z S08 001-initial #8 implement
