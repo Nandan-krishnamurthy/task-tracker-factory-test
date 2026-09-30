@@ -12,9 +12,9 @@ Status is one of: `Not started`, `In progress`, `Implemented`, `Deferred`.
 | REQ-002 | STORY-002 (#3) | #15 | `#3 AC3: an empty or whitespace-only title adds nothing and shows a message`; `#3 AC4: the message disappears after a valid title is added`; `#3 AC5: shows the trimmed title`; `#3 AC3: rejects a whitespace-only title` | Implemented |
 | REQ-003 | STORY-005 (#6) | #18 | `#6 AC1: a task added with a due date shows that date`; `#6 AC3: a task added with neither shows neither`; `#6 AC4: due date and priority are unchanged after a reload`; `#6 AC1: rejects a due date that is not a calendar day` | Implemented |
 | REQ-004 | STORY-005 (#6) | #18 | `#6 AC2: a task added with priority Low/Medium/High shows that priority`; `#6 AC3: a task added with neither shows neither`; `#6 AC5: the priority choices are only none, Low, Medium and High`; `#6 AC2: rejects a priority that is not low, medium or high` | Implemented |
-| REQ-005 | STORY-007 | — | — | Not started |
-| REQ-006 | STORY-007 | — | — | Not started |
-| REQ-007 | STORY-007 | — | — | Not started |
+| REQ-005 | STORY-007 (#8) | #20 | `#8 AC2: ticking an active task moves it from Active to Completed`; `#8 AC5: a completed task is still completed after a reload`; `#8 AC2: marks an active task done, without mutating the list` | Implemented |
+| REQ-006 | STORY-007 (#8) | #20 | `#8 AC3: unticking a completed task moves it from Completed to Active`; `#8 AC3: marks a done task not done again`; `#8 AC2 AC3 AC4: ticking and unticking moves a task between the views` | Implemented |
+| REQ-007 | STORY-007 (#8) | #20 | `#8 AC1: the app opens on the Active view, marked as current, listing only open tasks`; `#8 AC4: the Completed view lists only done tasks and is marked as current`; `#8 AC4: the views and checkboxes work from the keyboard`; `#8 AC1: Active lists only tasks that are not done` | Implemented |
 | REQ-008 | STORY-008 | — | — | Not started |
 | REQ-009 | STORY-009 | — | — | Not started |
 | REQ-010 | STORY-009 | — | — | Not started |
