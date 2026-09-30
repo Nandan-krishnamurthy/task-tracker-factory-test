@@ -3,13 +3,14 @@ import { expect, test, type Page } from '@playwright/test';
 const KEY = 'task-tracker:v1';
 const title = (page: Page) => page.getByLabel('Task title');
 const tasks = (page: Page) => page.getByRole('list', { name: 'Tasks' }).getByRole('listitem');
+const shownTitles = (page: Page) => tasks(page).locator('.task-title');
 
 async function addTasks(page: Page, ...titles: string[]) {
   for (const value of titles) {
     await title(page).fill(value);
     await title(page).press('Enter');
   }
-  await expect(tasks(page)).toHaveText(titles);
+  await expect(shownTitles(page)).toHaveText(titles);
 }
 
 // Each test gets a fresh browser context, so localStorage starts empty.
@@ -18,7 +19,7 @@ test('#4 AC1: after a reload the same tasks are shown, in the same order', async
   await page.goto('/');
   await addTasks(page, 'Buy milk', 'Walk dog', 'Call mum');
   await page.reload();
-  await expect(tasks(page)).toHaveText(['Buy milk', 'Walk dog', 'Call mum']);
+  await expect(shownTitles(page)).toHaveText(['Buy milk', 'Walk dog', 'Call mum']);
 });
 
 test('#4 AC2: a new page in the same browser profile shows the tasks with no user action', async ({
@@ -31,7 +32,7 @@ test('#4 AC2: a new page in the same browser profile shows the tasks with no use
 
   const reopened = await context.newPage();
   await reopened.goto('/');
-  await expect(tasks(reopened)).toHaveText(['Buy milk', 'Walk dog']);
+  await expect(shownTitles(reopened)).toHaveText(['Buy milk', 'Walk dog']);
 });
 
 test('#4 AC3: once the add has returned, task-tracker:v1 already holds the task', async ({ page }) => {

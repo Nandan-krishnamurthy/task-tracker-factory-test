@@ -5,6 +5,7 @@ import {
   INVALID_PRIORITY,
   isCalendarDate,
   TITLE_REQUIRED,
+  updateTask,
   validateTitle,
   type Task,
 } from './task';
@@ -106,5 +107,28 @@ describe('createTask with a due date and a priority', () => {
   it('#6 AC1: any real calendar day is allowed, including past dates', () => {
     expect(isCalendarDate('2020-02-29')).toBe(true);
     expect(isCalendarDate('2021-02-29')).toBe(false);
+  });
+});
+
+describe('updateTask', () => {
+  const list: Task[] = [
+    { id: 'a', title: 'Buy milk', dueDate: '2026-10-01', priority: 'high', completed: true, createdAt: 'x' },
+    { id: 'b', title: 'Walk dog', dueDate: null, priority: null, completed: false, createdAt: 'y' },
+  ];
+
+  it('#9 AC1 AC2: changes the title (trimmed) and keeps every other field and the position', () => {
+    const result = updateTask(list, 'a', { title: '  Buy oat milk ' });
+    if (!result.ok) throw new Error('expected ok');
+    expect(result.tasks).toEqual([{ ...list[0], title: 'Buy oat milk' }, list[1]]);
+    expect(list[0].title).toBe('Buy milk'); // not mutated
+  });
+
+  it('#9 AC3: rejects an empty or whitespace-only title', () => {
+    expect(updateTask(list, 'a', { title: '' })).toEqual({ ok: false, error: TITLE_REQUIRED });
+    expect(updateTask(list, 'a', { title: ' \t ' })).toEqual({ ok: false, error: TITLE_REQUIRED });
+  });
+
+  it('returns the list unchanged for an unknown id', () => {
+    expect(updateTask(list, 'missing', { title: 'x' })).toEqual({ ok: true, tasks: list });
   });
 });

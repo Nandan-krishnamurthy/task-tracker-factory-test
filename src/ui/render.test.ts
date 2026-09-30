@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createController } from '../app/controller';
+import { TITLE_REQUIRED } from '../domain/task';
 import { bindEvents } from './events';
 import { ensureLayout, render } from './render';
 
@@ -32,7 +33,7 @@ describe('render', () => {
       validationMessage: null,
     });
     const item = root.querySelector('#task-list li')!;
-    expect(item.textContent).toBe('<b>x</b>');
+    expect(item.querySelector('.task-title')!.textContent).toBe('<b>x</b>');
     expect(item.querySelector('b')).toBeNull();
   });
 
@@ -84,7 +85,7 @@ describe('render', () => {
     };
     render(root, { tasks: [task], validationMessage: null });
     const item = root.querySelector('#task-list li')!;
-    expect(item.textContent).toBe('Walk dog');
+    expect(item.querySelector('.task-title')!.textContent).toBe('Walk dog');
     expect(item.querySelector('time, .task-priority')).toBeNull();
   });
 
@@ -138,7 +139,7 @@ describe('bindEvents', () => {
     const { form, input, list } = ensureLayout(root);
     input.value = 'Buy milk';
     form.requestSubmit();
-    expect(list.textContent).toBe('Buy milk');
+    expect([...list.querySelectorAll('.task-title')].map((t) => t.textContent)).toEqual(['Buy milk']);
     expect(input.value).toBe('');
   });
 
@@ -231,5 +232,78 @@ describe('Active and Completed views', () => {
     views.active.click();
     expect(titles()).toEqual(['Buy milk']);
     expect(box()!.checked).toBe(false);
+  });
+});
+
+describe('inline editing', () => {
+  function setup(completed = false) {
+    const controller = createController({
+      tasks: [{ id: 'a', title: 'Buy milk', dueDate: null, priority: null, completed, createdAt: '' }],
+      storage: { setItem: () => {} },
+      render: (state) => render(root, state),
+      now: () => new Date(),
+      newId: () => 'b',
+    });
+    render(root, controller.state());
+    bindEvents(root, controller);
+    return controller;
+  }
+  const editButton = () => root.querySelector<HTMLButtonElement>('#task-list .task-edit')!;
+  const editField = () => root.querySelector<HTMLInputElement>('#task-list .task-edit-title')!;
+  const titles = () => [...root.querySelectorAll('#task-list .task-title')].map((t) => t.textContent);
+
+  it('#9 AC1: Edit opens a labelled field with the title, and saving shows the new title', () => {
+    setup();
+    expect(editButton().textContent).toBe('Edit');
+    expect(editButton().getAttribute('aria-label')).toBe('Edit Buy milk');
+    editButton().click();
+    const field = editField();
+    expect(root.querySelector(`label[for="${field.id}"]`)!.textContent).toBe('New title');
+    expect(field.value).toBe('Buy milk');
+    expect(document.activeElement).toBe(field);
+    field.value = 'Buy oat milk';
+    field.form!.requestSubmit();
+    expect(titles()).toEqual(['Buy oat milk']);
+    expect(document.activeElement).toBe(editButton());
+  });
+
+  it('#9 AC2: editing a completed task keeps it completed', () => {
+    const controller = setup(true);
+    controller.setView('completed');
+    editButton().click();
+    editField().value = 'Buy oat milk';
+    editField().form!.requestSubmit();
+    expect(titles()).toEqual(['Buy oat milk']);
+    expect(controller.state().tasks[0].completed).toBe(true);
+  });
+
+  it('#9 AC3: an empty title shows a message next to the field and keeps the old title', () => {
+    const controller = setup();
+    editButton().click();
+    editField().value = '  ';
+    editField().form!.requestSubmit();
+    const message = root.querySelector('#task-list .task-edit-message')!;
+    expect(message.textContent).toBe(TITLE_REQUIRED);
+    expect(editField().getAttribute('aria-describedby')).toBe(message.id);
+    expect(editField().getAttribute('aria-invalid')).toBe('true');
+    expect(document.activeElement).toBe(editField());
+    expect(controller.state().tasks[0].title).toBe('Buy milk');
+  });
+
+  it('#9 AC4: Escape cancels, keeps the old title and returns focus to the Edit button', () => {
+    setup();
+    editButton().click();
+    editField().value = 'Something else';
+    editField().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(titles()).toEqual(['Buy milk']);
+    expect(document.activeElement).toBe(editButton());
+  });
+
+  it('#9 AC4: the Cancel button cancels too', () => {
+    setup();
+    editButton().click();
+    root.querySelector<HTMLButtonElement>('#task-list .task-edit-cancel')!.click();
+    expect(titles()).toEqual(['Buy milk']);
+    expect(document.activeElement).toBe(editButton());
   });
 });

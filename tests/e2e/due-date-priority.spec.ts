@@ -39,7 +39,7 @@ for (const [value, label] of [
 
 test('#6 AC3: a task added with neither shows neither', async ({ page }) => {
   await addTask(page, 'Walk dog');
-  await expect(task(page, 'Walk dog')).toHaveText('Walk dog');
+  await expect(task(page, 'Walk dog').locator('.task-title')).toHaveText('Walk dog');
   await expect(task(page, 'Walk dog').locator('time')).toHaveCount(0);
   await expect(task(page, 'Walk dog')).not.toContainText('priority');
 });
@@ -54,7 +54,7 @@ test('#6 AC4: due date and priority are unchanged after a reload', async ({ page
   await expect(task(page, 'Pay rent').locator('time')).toHaveAttribute('datetime', '2026-10-01');
   await expect(task(page, 'Pay rent')).toContainText('High priority');
   await expect(task(page, 'Call mum')).toContainText('Low priority');
-  await expect(task(page, 'Walk dog')).toHaveText('Walk dog');
+  await expect(task(page, 'Walk dog').locator('.task-title')).toHaveText('Walk dog');
 });
 
 test('#6 AC5: the priority choices are only none, Low, Medium and High', async ({ page }) => {
