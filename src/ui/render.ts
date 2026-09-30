@@ -172,40 +172,36 @@ function taskItem(task: Task): HTMLLIElement {
 
 /** The row in edit mode (architecture decision 8): Enter saves, Escape cancels. */
 function editItem(task: Task, error: string | null): HTMLLIElement {
-  const item = document.createElement('li');
-  const form = document.createElement('form');
-  form.className = 'task-edit-form';
+  const form = Object.assign(document.createElement('form'), {
+    className: 'task-edit-form',
+    noValidate: true,
+  });
   form.dataset.id = task.id;
-  form.noValidate = true;
-
-  const inputId = `edit-title-${task.id}`;
-  const messageId = `edit-message-${task.id}`;
-  const input = document.createElement('input');
-  input.id = inputId;
-  input.className = 'task-edit-title';
-  input.type = 'text';
-  input.autocomplete = 'off';
-  input.value = task.title;
-  input.setAttribute('aria-describedby', messageId);
+  const input = Object.assign(document.createElement('input'), {
+    id: `edit-title-${task.id}`,
+    className: 'task-edit-title',
+    type: 'text',
+    autocomplete: 'off',
+    value: task.title,
+  });
+  const message = Object.assign(document.createElement('p'), {
+    id: `edit-message-${task.id}`,
+    className: 'task-edit-message',
+    textContent: error ?? '',
+  });
+  message.setAttribute('aria-live', 'polite');
+  input.setAttribute('aria-describedby', message.id);
   if (error) {
     input.setAttribute('aria-invalid', 'true');
   }
-
-  const save = document.createElement('button');
-  save.type = 'submit';
-  save.textContent = 'Save';
-  const cancel = document.createElement('button');
-  cancel.type = 'button';
-  cancel.className = 'task-edit-cancel';
-  cancel.textContent = 'Cancel';
-
-  const message = document.createElement('p');
-  message.id = messageId;
-  message.className = 'task-edit-message';
-  message.setAttribute('aria-live', 'polite');
-  message.textContent = error ?? '';
-
-  form.append(labelFor(inputId, 'New title'), input, save, cancel, message);
+  const save = Object.assign(document.createElement('button'), { type: 'submit', textContent: 'Save' });
+  const cancel = Object.assign(document.createElement('button'), {
+    type: 'button',
+    className: 'task-edit-cancel',
+    textContent: 'Cancel',
+  });
+  form.append(labelFor(input.id, 'New title'), input, save, cancel, message);
+  const item = document.createElement('li');
   item.append(form);
   return item;
 }

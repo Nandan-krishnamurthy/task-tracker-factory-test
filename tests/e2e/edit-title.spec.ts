@@ -35,9 +35,7 @@ test('#9 AC1: editing an active task shows the new title immediately', async ({ 
   await expect(editButton(page, 'Buy oat milk')).toBeFocused();
 });
 
-test('#9 AC2: editing a completed task shows the new title and it stays completed', async ({
-  page,
-}) => {
+test('#9 AC2: a completed task shows its new title and stays completed', async ({ page }) => {
   await addTask(page, 'Buy milk');
   await page.getByRole('checkbox', { name: 'Done: Buy milk', exact: true }).click();
   await completedView(page).click();
@@ -46,9 +44,7 @@ test('#9 AC2: editing a completed task shows the new title and it stays complete
   await expect(page.getByRole('checkbox', { name: 'Done: Buy oat milk', exact: true })).toBeChecked();
 });
 
-test('#9 AC3: an empty or whitespace-only title is rejected with a message, and the old title kept', async ({
-  page,
-}) => {
+test('#9 AC3: a blank title is rejected with a message; the old title stays', async ({ page }) => {
   await addTask(page, 'Buy milk');
   for (const empty of ['', '   ']) {
     await editButton(page, 'Buy milk').click();
@@ -63,9 +59,7 @@ test('#9 AC3: an empty or whitespace-only title is rejected with a message, and 
   await expect(titles(page)).toHaveText(['Buy milk']);
 });
 
-test('#9 AC4: Escape cancels, keeps the old title and returns focus to the Edit button', async ({
-  page,
-}) => {
+test('#9 AC4: Escape cancels, keeps the title, refocuses the Edit button', async ({ page }) => {
   await addTask(page, 'Buy milk');
   await editButton(page, 'Buy milk').click();
   await expect(editField(page)).toBeFocused();

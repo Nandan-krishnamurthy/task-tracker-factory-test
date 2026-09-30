@@ -25,51 +25,36 @@ export function bindEvents(root: HTMLElement, controller: Controller): void {
   views.completed.addEventListener('click', () => controller.setView('completed'));
 
   // Inline editing (architecture decision 8). Rendering rebuilds the rows, so focus is set afterwards.
-  const editButton = (id: string) =>
-    [...list.querySelectorAll<HTMLButtonElement>('.task-edit')].find((b) => b.dataset.id === id);
-  const editInput = (id: string) => {
-    const form = [...list.querySelectorAll<HTMLFormElement>('.task-edit-form')].find(
-      (f) => f.dataset.id === id,
-    );
-    return form?.querySelector<HTMLInputElement>('.task-edit-title');
-  };
+  const focusEdit = (id: string) =>
+    [...list.querySelectorAll<HTMLElement>('.task-edit')].find((b) => b.dataset.id === id)?.focus();
+  const focusField = (id: string) => document.getElementById(`edit-title-${id}`)?.focus();
   const cancel = (id: string) => {
     controller.cancelEdit();
-    editButton(id)?.focus();
+    focusEdit(id);
   };
-
   list.addEventListener('click', (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLButtonElement)) {
-      return;
-    }
-    const id = target.closest<HTMLElement>('[data-id]')?.dataset.id;
-    if (id && target.classList.contains('task-edit')) {
+    const button = event.target instanceof HTMLButtonElement ? event.target : null;
+    const id = button?.closest<HTMLElement>('[data-id]')?.dataset.id;
+    if (id && button?.classList.contains('task-edit')) {
       controller.startEdit(id);
-      editInput(id)?.focus();
-    } else if (id && target.classList.contains('task-edit-cancel')) {
+      focusField(id);
+    } else if (id && button?.classList.contains('task-edit-cancel')) {
       cancel(id);
     }
   });
+  // Only the rows' edit forms are inside the list; the add-task form is not.
   list.addEventListener('submit', (event) => {
-    const form = event.target;
-    if (!(form instanceof HTMLFormElement) || !form.classList.contains('task-edit-form')) {
-      return;
-    }
     event.preventDefault();
+    const form = event.target as HTMLFormElement;
     const id = form.dataset.id!;
     const title = form.querySelector<HTMLInputElement>('.task-edit-title')!.value;
-    if (controller.editTask(id, title)) {
-      editButton(id)?.focus();
-    } else {
-      editInput(id)?.focus();
-    }
+    (controller.editTask(id, title) ? focusEdit : focusField)(id);
   });
   list.addEventListener('keydown', (event) => {
-    const form = (event.target as Element).closest?.('.task-edit-form');
-    if (event.key === 'Escape' && form instanceof HTMLFormElement && form.dataset.id) {
+    const id = (event.target as Element).closest<HTMLElement>('.task-edit-form')?.dataset.id;
+    if (event.key === 'Escape' && id) {
       event.preventDefault();
-      cancel(form.dataset.id);
+      cancel(id);
     }
   });
 }
