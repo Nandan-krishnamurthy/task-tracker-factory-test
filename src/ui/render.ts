@@ -111,7 +111,10 @@ export function render(root: HTMLElement, state: AppState): void {
   for (const [name, button] of Object.entries(views)) {
     button.setAttribute('aria-pressed', String(name === view));
   }
-  list.replaceChildren(...sortTasks(tasksForView(state.tasks, view)).map(taskItem));
+  const rows = sortTasks(tasksForView(state.tasks, view)).map((task) =>
+    task.id === state.editing?.id ? editItem(task, state.editing.error) : taskItem(task),
+  );
+  list.replaceChildren(...rows);
 }
 
 const PRIORITY_NAMES: Record<Priority, string> = { low: 'Low', medium: 'Medium', high: 'High' };
@@ -157,6 +160,53 @@ function taskItem(task: Task): HTMLLIElement {
     priority.textContent = `${PRIORITY_NAMES[task.priority]} priority`;
     item.append(' ', priority);
   }
+  const edit = document.createElement('button');
+  edit.type = 'button';
+  edit.className = 'task-edit';
+  edit.dataset.id = task.id;
+  edit.textContent = 'Edit';
+  edit.setAttribute('aria-label', `Edit ${task.title}`); // tells the rows' Edit buttons apart
+  item.append(' ', edit);
+  return item;
+}
+
+/** The row in edit mode (architecture decision 8): Enter saves, Escape cancels. */
+function editItem(task: Task, error: string | null): HTMLLIElement {
+  const item = document.createElement('li');
+  const form = document.createElement('form');
+  form.className = 'task-edit-form';
+  form.dataset.id = task.id;
+  form.noValidate = true;
+
+  const inputId = `edit-title-${task.id}`;
+  const messageId = `edit-message-${task.id}`;
+  const input = document.createElement('input');
+  input.id = inputId;
+  input.className = 'task-edit-title';
+  input.type = 'text';
+  input.autocomplete = 'off';
+  input.value = task.title;
+  input.setAttribute('aria-describedby', messageId);
+  if (error) {
+    input.setAttribute('aria-invalid', 'true');
+  }
+
+  const save = document.createElement('button');
+  save.type = 'submit';
+  save.textContent = 'Save';
+  const cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.className = 'task-edit-cancel';
+  cancel.textContent = 'Cancel';
+
+  const message = document.createElement('p');
+  message.id = messageId;
+  message.className = 'task-edit-message';
+  message.setAttribute('aria-live', 'polite');
+  message.textContent = error ?? '';
+
+  form.append(labelFor(inputId, 'New title'), input, save, cancel, message);
+  item.append(form);
   return item;
 }
 

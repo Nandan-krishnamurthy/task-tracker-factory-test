@@ -23,4 +23,53 @@ export function bindEvents(root: HTMLElement, controller: Controller): void {
   });
   views.active.addEventListener('click', () => controller.setView('active'));
   views.completed.addEventListener('click', () => controller.setView('completed'));
+
+  // Inline editing (architecture decision 8). Rendering rebuilds the rows, so focus is set afterwards.
+  const editButton = (id: string) =>
+    [...list.querySelectorAll<HTMLButtonElement>('.task-edit')].find((b) => b.dataset.id === id);
+  const editInput = (id: string) => {
+    const form = [...list.querySelectorAll<HTMLFormElement>('.task-edit-form')].find(
+      (f) => f.dataset.id === id,
+    );
+    return form?.querySelector<HTMLInputElement>('.task-edit-title');
+  };
+  const cancel = (id: string) => {
+    controller.cancelEdit();
+    editButton(id)?.focus();
+  };
+
+  list.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLButtonElement)) {
+      return;
+    }
+    const id = target.closest<HTMLElement>('[data-id]')?.dataset.id;
+    if (id && target.classList.contains('task-edit')) {
+      controller.startEdit(id);
+      editInput(id)?.focus();
+    } else if (id && target.classList.contains('task-edit-cancel')) {
+      cancel(id);
+    }
+  });
+  list.addEventListener('submit', (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement) || !form.classList.contains('task-edit-form')) {
+      return;
+    }
+    event.preventDefault();
+    const id = form.dataset.id!;
+    const title = form.querySelector<HTMLInputElement>('.task-edit-title')!.value;
+    if (controller.editTask(id, title)) {
+      editButton(id)?.focus();
+    } else {
+      editInput(id)?.focus();
+    }
+  });
+  list.addEventListener('keydown', (event) => {
+    const form = (event.target as Element).closest?.('.task-edit-form');
+    if (event.key === 'Escape' && form instanceof HTMLFormElement && form.dataset.id) {
+      event.preventDefault();
+      cancel(form.dataset.id);
+    }
+  });
 }
