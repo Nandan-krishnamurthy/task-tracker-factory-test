@@ -162,3 +162,74 @@ describe('bindEvents', () => {
     expect([input.value, dueDate.value, priority.value]).toEqual(['', '', '']);
   });
 });
+
+describe('Active and Completed views', () => {
+  const task = (id: string, completed: boolean) => ({
+    id,
+    title: id,
+    dueDate: null,
+    priority: null,
+    completed,
+    createdAt: '',
+  });
+  const tasks = [task('open', false), task('done', true)];
+  const titles = () => [...root.querySelectorAll('#task-list .task-title')].map((t) => t.textContent);
+  const pressed = () =>
+    [...root.querySelectorAll('#task-views button')].map((b) => [
+      b.textContent,
+      b.getAttribute('aria-pressed'),
+    ]);
+
+  it('#8 AC1: Active is shown by default, marked as current, with only tasks not done', () => {
+    render(root, { tasks, validationMessage: null });
+    expect(root.querySelector('#task-views')!.getAttribute('role')).toBe('group');
+    expect(pressed()).toEqual([
+      ['Active', 'true'],
+      ['Completed', 'false'],
+    ]);
+    expect(titles()).toEqual(['open']);
+  });
+
+  it('#8 AC4: the Completed view lists only done tasks and is marked as current', () => {
+    render(root, { tasks, validationMessage: null, view: 'completed' });
+    expect(pressed()).toEqual([
+      ['Active', 'false'],
+      ['Completed', 'true'],
+    ]);
+    expect(titles()).toEqual(['done']);
+  });
+
+  it('#8 AC2 AC3: each task has a checkbox that names the task and shows whether it is done', () => {
+    render(root, { tasks, validationMessage: null, view: 'completed' });
+    const box = root.querySelector<HTMLInputElement>('#task-list input[type="checkbox"]')!;
+    expect(box.getAttribute('aria-label')).toBe('Done: done');
+    expect(box.checked).toBe(true);
+  });
+
+  it('#8 AC2 AC3 AC4: ticking and unticking moves a task between the views', () => {
+    const controller = createController({
+      tasks: [],
+      storage: { setItem: () => {} },
+      render: (state) => render(root, state),
+      now: () => new Date(),
+      newId: () => 'a',
+    });
+    render(root, controller.state());
+    bindEvents(root, controller);
+    controller.addTask('Buy milk');
+    const { views } = ensureLayout(root);
+    const box = () => root.querySelector<HTMLInputElement>('#task-list .task-done');
+
+    box()!.click(); // tick
+    expect(titles()).toEqual([]);
+    views.completed.click();
+    expect(titles()).toEqual(['Buy milk']);
+    expect(box()!.checked).toBe(true);
+
+    box()!.click(); // untick
+    expect(titles()).toEqual([]);
+    views.active.click();
+    expect(titles()).toEqual(['Buy milk']);
+    expect(box()!.checked).toBe(false);
+  });
+});

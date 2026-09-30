@@ -27,7 +27,7 @@ describe('controller.addTask', () => {
   it('#3 AC3: an empty title adds nothing and sets the validation message', () => {
     const { controller, render } = setup();
     expect(controller.addTask('  ')).toBe(false);
-    expect(controller.state()).toEqual({ tasks: [], validationMessage: TITLE_REQUIRED });
+    expect(controller.state()).toEqual({ tasks: [], validationMessage: TITLE_REQUIRED, view: 'active' });
     expect(render).toHaveBeenCalledTimes(1);
   });
 
@@ -84,7 +84,7 @@ describe('controller persistence', () => {
   });
 
   it('#4 AC4: with nothing stored, the controller starts with an empty list and no message', () => {
-    expect(persistent().controller.state()).toEqual({ tasks: [], validationMessage: null });
+    expect(persistent().controller.state()).toEqual({ tasks: [], validationMessage: null, view: 'active' });
   });
 });
 
@@ -124,5 +124,57 @@ describe('controller when saving fails', () => {
     controller.addTask('Walk dog');
     expect(controller.state().storageWarning).toBeUndefined();
     expect(controller.state().tasks).toHaveLength(2);
+  });
+});
+
+describe('controller views and completion', () => {
+  it('#8 AC1: starts on the Active view', () => {
+    expect(setup().controller.state().view).toBe('active');
+  });
+
+  it('#8 AC2 AC3: toggleTask marks a task done and not done, and renders', () => {
+    const { controller, render } = setup();
+    controller.addTask('Buy milk');
+    const [{ id }] = controller.state().tasks;
+    controller.toggleTask(id, true);
+    expect(controller.state().tasks[0].completed).toBe(true);
+    expect(render).toHaveBeenLastCalledWith(controller.state());
+    controller.toggleTask(id, false);
+    expect(controller.state().tasks[0].completed).toBe(false);
+  });
+
+  it('#8 AC4: setView switches the view and renders', () => {
+    const { controller, render } = setup();
+    controller.setView('completed');
+    expect(controller.state().view).toBe('completed');
+    expect(render).toHaveBeenLastCalledWith(controller.state());
+  });
+
+  it('#8: adding a task while Completed is shown switches to Active', () => {
+    const { controller } = setup();
+    controller.setView('completed');
+    controller.addTask('');
+    expect(controller.state().view).toBe('completed'); // an invalid title changes nothing
+    controller.addTask('Buy milk');
+    expect(controller.state().view).toBe('active');
+  });
+});
+
+describe('controller completion persistence', () => {
+  it('#8 AC5: a completed task is saved, and is still completed when loaded again', () => {
+    const items = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => items.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        items.set(key, value);
+      },
+    };
+    const deps = { storage, render: () => {}, now: () => new Date(), newId: () => 'a' };
+    const first = createController({ ...deps, tasks: [] });
+    first.addTask('Buy milk');
+    first.toggleTask('a', true);
+    const second = createController({ ...deps, tasks: loadTasks(storage).tasks });
+    expect(second.state().tasks.map((t) => [t.id, t.completed])).toEqual([['a', true]]);
+    expect(second.state().view).toBe('active');
   });
 });

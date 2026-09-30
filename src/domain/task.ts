@@ -78,3 +78,14 @@ export function createTask(
   };
   return { ok: true, tasks: [...tasks, task], task };
 }
+
+/** Marks the task `id` done or not done. Never mutates `tasks`; an unknown id returns it unchanged. */
+export function setCompleted(tasks: readonly Task[], id: string, completed: boolean): readonly Task[] {
+  const index = tasks.findIndex((task) => task.id === id);
+  if (index === -1 || tasks[index].completed === completed) {
+    return tasks;
+  }
+  const next = [...tasks];
+  next[index] = { ...tasks[index], completed };
+  return next;
+}

@@ -1,4 +1,5 @@
 import type { AppState } from '../app/controller';
+import { tasksForView, type View } from '../domain/filter';
 import { sortTasks } from '../domain/sort';
 import type { Priority, Task } from '../domain/task';
 
@@ -8,6 +9,7 @@ export interface Layout {
   dueDate: HTMLInputElement;
   priority: HTMLSelectElement;
   message: HTMLElement;
+  views: Record<View, HTMLButtonElement>;
   list: HTMLUListElement;
   warning: HTMLElement;
 }
@@ -17,6 +19,7 @@ const INPUT_ID = 'task-title';
 const DUE_ID = 'task-due-date';
 const PRIORITY_ID = 'task-priority';
 const MESSAGE_ID = 'task-title-message';
+const VIEWS_ID = 'task-views';
 const LIST_ID = 'task-list';
 const WARNING_ID = 'storage-warning';
 
@@ -30,6 +33,10 @@ export function ensureLayout(root: HTMLElement): Layout {
       dueDate: root.querySelector<HTMLInputElement>(`#${DUE_ID}`)!,
       priority: root.querySelector<HTMLSelectElement>(`#${PRIORITY_ID}`)!,
       message: root.querySelector<HTMLElement>(`#${MESSAGE_ID}`)!,
+      views: {
+        active: root.querySelector<HTMLButtonElement>(`#${VIEWS_ID} [data-view="active"]`)!,
+        completed: root.querySelector<HTMLButtonElement>(`#${VIEWS_ID} [data-view="completed"]`)!,
+      },
       list: root.querySelector<HTMLUListElement>(`#${LIST_ID}`)!,
       warning: root.querySelector<HTMLElement>(`#${WARNING_ID}`)!,
     };
@@ -75,6 +82,14 @@ export function ensureLayout(root: HTMLElement): Layout {
 
   form.append(label, input, dueLabel, dueDate, priorityLabel, priority, button, message);
 
+  // Two toggle buttons: native buttons are keyboard-operable, and aria-pressed marks the current view.
+  const viewGroup = document.createElement('div');
+  viewGroup.id = VIEWS_ID;
+  viewGroup.setAttribute('role', 'group');
+  viewGroup.setAttribute('aria-label', 'Show');
+  const views = { active: viewButton('active', 'Active'), completed: viewButton('completed', 'Completed') };
+  viewGroup.append(views.active, views.completed);
+
   const list = document.createElement('ul');
   list.id = LIST_ID;
   list.setAttribute('aria-label', 'Tasks');
@@ -84,15 +99,19 @@ export function ensureLayout(root: HTMLElement): Layout {
   warning.id = WARNING_ID;
   warning.setAttribute('role', 'alert');
 
-  root.append(warning, form, list);
-  return { form, input, dueDate, priority, message, list, warning };
+  root.append(warning, form, viewGroup, list);
+  return { form, input, dueDate, priority, message, views, list, warning };
 }
 
 export function render(root: HTMLElement, state: AppState): void {
-  const { message, list, warning } = ensureLayout(root);
+  const { message, views, list, warning } = ensureLayout(root);
+  const view = state.view ?? 'active';
   message.textContent = state.validationMessage ?? '';
   warning.textContent = state.storageWarning ?? '';
-  list.replaceChildren(...sortTasks(state.tasks).map(taskItem));
+  for (const [name, button] of Object.entries(views)) {
+    button.setAttribute('aria-pressed', String(name === view));
+  }
+  list.replaceChildren(...sortTasks(tasksForView(state.tasks, view)).map(taskItem));
 }
 
 const PRIORITY_NAMES: Record<Priority, string> = { low: 'Low', medium: 'Medium', high: 'High' };
@@ -104,8 +123,23 @@ function labelFor(id: string, text: string): HTMLLabelElement {
   return label;
 }
 
+function viewButton(view: View, text: string): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.dataset.view = view;
+  button.textContent = text;
+  return button;
+}
+
 function taskItem(task: Task): HTMLLIElement {
   const item = document.createElement('li');
+  const done = document.createElement('input');
+  done.type = 'checkbox';
+  done.className = 'task-done';
+  done.dataset.id = task.id;
+  done.checked = task.completed;
+  done.setAttribute('aria-label', `Done: ${task.title}`); // names the task; the text stays the title
+  item.append(done);
   const title = document.createElement('span');
   title.className = 'task-title';
   title.textContent = task.title; // textContent, never innerHTML: titles are user input
