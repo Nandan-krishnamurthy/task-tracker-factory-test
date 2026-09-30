@@ -88,6 +88,22 @@ describe('render', () => {
     expect(item.querySelector('time, .task-priority')).toBeNull();
   });
 
+  it('#7 AC1 AC2: lists tasks soonest due first, undated last, without reordering the state', () => {
+    const task = (id: string, dueDate: string | null) => ({
+      id,
+      title: id,
+      dueDate,
+      priority: null,
+      completed: false,
+      createdAt: '',
+    });
+    const tasks = [task('none', null), task('oct3', '2026-10-03'), task('oct1', '2026-10-01')];
+    render(root, { tasks, validationMessage: null });
+    const titles = [...root.querySelectorAll('#task-list .task-title')].map((t) => t.textContent);
+    expect(titles).toEqual(['oct1', 'oct3', 'none']);
+    expect(tasks.map((t) => t.id)).toEqual(['none', 'oct3', 'oct1']);
+  });
+
   it('#5 AC3: shows the storage warning in an alert region, and empties it when cleared', () => {
     render(root, { tasks: [], validationMessage: null });
     const warning = root.querySelector('#storage-warning')!;

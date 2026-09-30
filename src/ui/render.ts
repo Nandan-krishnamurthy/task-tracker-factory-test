@@ -1,4 +1,5 @@
 import type { AppState } from '../app/controller';
+import { sortTasks } from '../domain/sort';
 import type { Priority, Task } from '../domain/task';
 
 export interface Layout {
@@ -91,7 +92,7 @@ export function render(root: HTMLElement, state: AppState): void {
   const { message, list, warning } = ensureLayout(root);
   message.textContent = state.validationMessage ?? '';
   warning.textContent = state.storageWarning ?? '';
-  list.replaceChildren(...state.tasks.map(taskItem));
+  list.replaceChildren(...sortTasks(state.tasks).map(taskItem));
 }
 
 const PRIORITY_NAMES: Record<Priority, string> = { low: 'Low', medium: 'Medium', high: 'High' };
