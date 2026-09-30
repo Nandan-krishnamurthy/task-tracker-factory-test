@@ -4,6 +4,7 @@ const KEY = 'task-tracker:v1';
 const WARNING = 'Your changes may not be saved: this browser could not store them.';
 const title = (page: Page) => page.getByLabel('Task title');
 const tasks = (page: Page) => page.getByRole('list', { name: 'Tasks' }).getByRole('listitem');
+const titles = (page: Page) => tasks(page).locator('.task-title');
 
 /** Stores `raw` under the app's key before any page script runs, on every navigation. */
 async function seed(page: Page, raw: string) {
@@ -37,7 +38,7 @@ test('#5 AC1: text that is not JSON gives an empty list, and a task can be added
   await expect(title(page)).toBeVisible();
   await expect(tasks(page)).toHaveCount(0);
   await addTask(page, 'Buy milk');
-  await expect(tasks(page)).toHaveText(['Buy milk']);
+  await expect(titles(page)).toHaveText(['Buy milk']);
   expect(errors).toEqual([]);
 });
 
@@ -85,7 +86,7 @@ test('#5 AC3: when saving throws, the task still appears with an announced warni
   await page.goto('/');
   await expect(page.getByRole('alert')).toHaveText('');
   await addTask(page, 'Buy milk');
-  await expect(tasks(page)).toHaveText(['Buy milk']);
+  await expect(titles(page)).toHaveText(['Buy milk']);
   const alert = page.getByRole('alert');
   await expect(alert).toBeVisible();
   await expect(alert).toHaveText(WARNING);

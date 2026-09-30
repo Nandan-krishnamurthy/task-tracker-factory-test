@@ -86,6 +86,14 @@ describe('controller persistence', () => {
   it('#4 AC4: with nothing stored, the controller starts with an empty list and no message', () => {
     expect(persistent().controller.state()).toEqual({ tasks: [], validationMessage: null, view: 'active' });
   });
+
+  it('#9 AC5: an edited title is saved, and is shown when loaded again', () => {
+    const first = persistent();
+    first.controller.addTask('Buy milk');
+    first.controller.editTask('id-1', 'Buy oat milk');
+    const second = persistent({ [STORAGE_KEY]: first.storage.getItem(STORAGE_KEY)! });
+    expect(second.controller.state().tasks.map((t) => t.title)).toEqual(['Buy oat milk']);
+  });
 });
 
 describe('controller when saving fails', () => {
@@ -176,5 +184,37 @@ describe('controller completion persistence', () => {
     const second = createController({ ...deps, tasks: loadTasks(storage).tasks });
     expect(second.state().tasks.map((t) => [t.id, t.completed])).toEqual([['a', true]]);
     expect(second.state().view).toBe('active');
+  });
+});
+
+describe('controller editing', () => {
+  function editing() {
+    const { controller, render } = setup();
+    controller.addTask('Buy milk');
+    controller.startEdit('id-1');
+    return { controller, render };
+  }
+
+  it('#9 AC1: startEdit opens the form, and editTask saves the new title and closes it', () => {
+    const { controller, render } = editing();
+    expect(controller.state().editing).toEqual({ id: 'id-1', error: null });
+    expect(controller.editTask('id-1', 'Buy oat milk')).toBe(true);
+    expect(controller.state().tasks[0].title).toBe('Buy oat milk');
+    expect(controller.state().editing).toBeUndefined();
+    expect(render).toHaveBeenLastCalledWith(controller.state());
+  });
+
+  it('#9 AC3: an empty title is rejected, the old title kept and the form left open with a message', () => {
+    const { controller } = editing();
+    expect(controller.editTask('id-1', '   ')).toBe(false);
+    expect(controller.state().tasks[0].title).toBe('Buy milk');
+    expect(controller.state().editing).toEqual({ id: 'id-1', error: TITLE_REQUIRED });
+  });
+
+  it('#9 AC4: cancelEdit closes the form and keeps the old title', () => {
+    const { controller } = editing();
+    controller.cancelEdit();
+    expect(controller.state().editing).toBeUndefined();
+    expect(controller.state().tasks[0].title).toBe('Buy milk');
   });
 });

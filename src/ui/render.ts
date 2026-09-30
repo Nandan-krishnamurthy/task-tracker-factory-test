@@ -111,7 +111,10 @@ export function render(root: HTMLElement, state: AppState): void {
   for (const [name, button] of Object.entries(views)) {
     button.setAttribute('aria-pressed', String(name === view));
   }
-  list.replaceChildren(...sortTasks(tasksForView(state.tasks, view)).map(taskItem));
+  const rows = sortTasks(tasksForView(state.tasks, view)).map((task) =>
+    task.id === state.editing?.id ? editItem(task, state.editing.error) : taskItem(task),
+  );
+  list.replaceChildren(...rows);
 }
 
 const PRIORITY_NAMES: Record<Priority, string> = { low: 'Low', medium: 'Medium', high: 'High' };
@@ -157,6 +160,49 @@ function taskItem(task: Task): HTMLLIElement {
     priority.textContent = `${PRIORITY_NAMES[task.priority]} priority`;
     item.append(' ', priority);
   }
+  const edit = document.createElement('button');
+  edit.type = 'button';
+  edit.className = 'task-edit';
+  edit.dataset.id = task.id;
+  edit.textContent = 'Edit';
+  edit.setAttribute('aria-label', `Edit ${task.title}`); // tells the rows' Edit buttons apart
+  item.append(' ', edit);
+  return item;
+}
+
+/** The row in edit mode (architecture decision 8): Enter saves, Escape cancels. */
+function editItem(task: Task, error: string | null): HTMLLIElement {
+  const form = Object.assign(document.createElement('form'), {
+    className: 'task-edit-form',
+    noValidate: true,
+  });
+  form.dataset.id = task.id;
+  const input = Object.assign(document.createElement('input'), {
+    id: `edit-title-${task.id}`,
+    className: 'task-edit-title',
+    type: 'text',
+    autocomplete: 'off',
+    value: task.title,
+  });
+  const message = Object.assign(document.createElement('p'), {
+    id: `edit-message-${task.id}`,
+    className: 'task-edit-message',
+    textContent: error ?? '',
+  });
+  message.setAttribute('aria-live', 'polite');
+  input.setAttribute('aria-describedby', message.id);
+  if (error) {
+    input.setAttribute('aria-invalid', 'true');
+  }
+  const save = Object.assign(document.createElement('button'), { type: 'submit', textContent: 'Save' });
+  const cancel = Object.assign(document.createElement('button'), {
+    type: 'button',
+    className: 'task-edit-cancel',
+    textContent: 'Cancel',
+  });
+  form.append(labelFor(input.id, 'New title'), input, save, cancel, message);
+  const item = document.createElement('li');
+  item.append(form);
   return item;
 }
 

@@ -1,5 +1,5 @@
 import type { View } from '../domain/filter';
-import { createTask, setCompleted, type NewTask, type Task } from '../domain/task';
+import { createTask, setCompleted, updateTask, type NewTask, type Task } from '../domain/task';
 import { saveTasks } from '../storage/taskStore';
 
 export interface AppState {
@@ -7,6 +7,8 @@ export interface AppState {
   readonly validationMessage: string | null;
   /** The view shown (REQ-007). Absent means Active. */
   readonly view?: View;
+  /** The task being edited in its row, and the message for a rejected title (REQ-008). */
+  readonly editing?: { readonly id: string; readonly error: string | null };
   /** Set while the last save failed: the tasks are shown but may not be stored. */
   readonly storageWarning?: string;
 }
@@ -29,6 +31,12 @@ export interface Controller {
   toggleTask(id: string, completed: boolean): void;
   /** Shows the Active or the Completed tasks (REQ-007). */
   setView(view: View): void;
+  /** Opens the inline edit form of a task. */
+  startEdit(id: string): void;
+  /** Saves a new title; returns false (keeping the old title and the form open) if it is invalid. */
+  editTask(id: string, title: string): boolean;
+  /** Closes the edit form without changing the task. */
+  cancelEdit(): void;
   state(): AppState;
 }
 
@@ -63,6 +71,21 @@ export function createController({ tasks, storage, render, now, newId }: Control
     },
     setView(view) {
       update({ ...current, view });
+    },
+    startEdit(id) {
+      update({ ...current, editing: { id, error: null } });
+    },
+    editTask(id, title) {
+      const result = updateTask(current.tasks, id, { title });
+      if (!result.ok) {
+        update({ ...current, editing: { id, error: result.error } });
+        return false;
+      }
+      update({ ...current, tasks: result.tasks, editing: undefined });
+      return true;
+    },
+    cancelEdit() {
+      update({ ...current, editing: undefined });
     },
     state: () => current,
   };

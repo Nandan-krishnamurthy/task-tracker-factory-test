@@ -89,3 +89,28 @@ export function setCompleted(tasks: readonly Task[], id: string, completed: bool
   next[index] = { ...tasks[index], completed };
   return next;
 }
+
+export interface TaskPatch {
+  title?: string;
+}
+
+export type UpdateResult = { ok: true; tasks: readonly Task[] } | { ok: false; error: string };
+
+/** Changes fields of the task `id`, which keeps its place in the list. Never mutates `tasks`. */
+export function updateTask(tasks: readonly Task[], id: string, patch: TaskPatch): UpdateResult {
+  const index = tasks.findIndex((task) => task.id === id);
+  if (index === -1) {
+    return { ok: true, tasks };
+  }
+  const changed = { ...tasks[index] };
+  if (patch.title !== undefined) {
+    const title = validateTitle(patch.title);
+    if (!title.ok) {
+      return title;
+    }
+    changed.title = title.title;
+  }
+  const next = [...tasks];
+  next[index] = changed;
+  return { ok: true, tasks: next };
+}
