@@ -252,6 +252,23 @@ describe('inline editing', () => {
   const editField = () => root.querySelector<HTMLInputElement>('#task-list .task-edit-title')!;
   const titles = () => [...root.querySelectorAll('#task-list .task-title')].map((t) => t.textContent);
 
+  it('#10 AC1-AC4: the edit form holds the due date and priority, and saving changes them', () => {
+    const controller = setup();
+    controller.editTask('a', 'Buy milk', { dueDate: '2026-10-01', priority: 'high' });
+    editButton().click();
+    const due = root.querySelector<HTMLInputElement>('#task-list .task-edit-due')!;
+    const priority = root.querySelector<HTMLSelectElement>('#task-list .task-edit-priority')!;
+    expect(root.querySelector(`label[for="${due.id}"]`)!.textContent).toBe('New due date');
+    expect(root.querySelector(`label[for="${priority.id}"]`)!.textContent).toBe('New priority');
+    expect([due.type, due.value, priority.value]).toEqual(['date', '2026-10-01', 'high']);
+    expect([...priority.options].map((o) => o.value)).toEqual(['', 'low', 'medium', 'high']);
+    due.value = '';
+    priority.value = 'low';
+    editField().form!.requestSubmit();
+    expect(root.querySelector('#task-list time')).toBeNull();
+    expect(root.querySelector('#task-list .task-priority')!.textContent).toBe('Low priority');
+  });
+
   it('#9 AC1: Edit opens a labelled field with the title, and saving shows the new title', () => {
     setup();
     expect(editButton().textContent).toBe('Edit');
