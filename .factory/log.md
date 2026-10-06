@@ -45,3 +45,4 @@
 2026-10-06T05:33:28Z S08 001-initial #10 rework round 1
 2026-10-06T05:34:58Z S09 001-initial #10 tests pass (vitest 101 passed, playwright 47 passed; build+typecheck OK; lint skipped)
 2026-10-06T05:38:08Z S11 001-initial #10 PR #22 (rework round 1)
+2026-10-06T07:12:05Z S07 001-initial #11 branch story/11-delete-a-task
