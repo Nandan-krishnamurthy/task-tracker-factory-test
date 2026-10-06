@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   createTask,
+  deleteTask,
   INVALID_DUE_DATE,
   INVALID_PRIORITY,
   isCalendarDate,
@@ -160,5 +161,27 @@ describe('updateTask', () => {
 
   it('returns the list unchanged for an unknown id', () => {
     expect(updateTask(list, 'missing', { title: 'x' })).toEqual({ ok: true, tasks: list });
+  });
+});
+
+describe('deleteTask', () => {
+  const task = (id: string): Task => ({
+    id,
+    title: `Task ${id}`,
+    dueDate: null,
+    priority: null,
+    completed: id === 'b',
+    createdAt: NOW.toISOString(),
+  });
+  const list = [task('a'), task('b'), task('c')];
+
+  it('#11 AC1 AC2: removes only the given id and keeps the others in order', () => {
+    expect(deleteTask(list, 'b')).toEqual([list[0], list[2]]);
+    expect(deleteTask(list, 'a')).toEqual([list[1], list[2]]);
+    expect(list).toHaveLength(3); // not mutated
+  });
+
+  it('#11: returns the list unchanged for an unknown id', () => {
+    expect(deleteTask(list, 'missing')).toBe(list);
   });
 });
