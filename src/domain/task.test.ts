@@ -128,6 +128,36 @@ describe('updateTask', () => {
     expect(updateTask(list, 'a', { title: ' \t ' })).toEqual({ ok: false, error: TITLE_REQUIRED });
   });
 
+  it('#10 AC1 AC3: sets and changes the due date and priority, keeping the other fields', () => {
+    const result = updateTask(list, 'b', { dueDate: '2026-10-03', priority: 'low' });
+    if (!result.ok) throw new Error('expected ok');
+    expect(result.tasks[1]).toEqual({ ...list[1], dueDate: '2026-10-03', priority: 'low' });
+    const again = updateTask(result.tasks, 'b', { dueDate: '2026-10-04', priority: 'high' });
+    if (!again.ok) throw new Error('expected ok');
+    expect([again.tasks[1].dueDate, again.tasks[1].priority]).toEqual(['2026-10-04', 'high']);
+  });
+
+  it('#10 AC2 AC4: an empty value clears the due date and the priority', () => {
+    const result = updateTask(list, 'a', { dueDate: '', priority: '' });
+    if (!result.ok) throw new Error('expected ok');
+    expect(result.tasks[0]).toEqual({ ...list[0], dueDate: null, priority: null });
+    expect(result.tasks[0].completed).toBe(true);
+  });
+
+  it('#10 AC4: clearing an existing priority removes only the priority', () => {
+    for (const priority of ['', null]) {
+      const result = updateTask(list, 'a', { priority });
+      if (!result.ok) throw new Error('expected ok');
+      expect(result.tasks).toEqual([{ ...list[0], priority: null }, list[1]]);
+    }
+    expect(list[0].priority).toBe('high'); // not mutated
+  });
+
+  it('#10: rejects an invalid due date or priority, changing nothing', () => {
+    expect(updateTask(list, 'a', { dueDate: '2026-02-30' })).toEqual({ ok: false, error: INVALID_DUE_DATE });
+    expect(updateTask(list, 'a', { priority: 'urgent' })).toEqual({ ok: false, error: INVALID_PRIORITY });
+  });
+
   it('returns the list unchanged for an unknown id', () => {
     expect(updateTask(list, 'missing', { title: 'x' })).toEqual({ ok: true, tasks: list });
   });

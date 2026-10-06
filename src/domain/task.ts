@@ -92,6 +92,8 @@ export function setCompleted(tasks: readonly Task[], id: string, completed: bool
 
 export interface TaskPatch {
   title?: string;
+  dueDate?: string | null; // YYYY-MM-DD; empty or null clears it
+  priority?: string | null; // 'low' | 'medium' | 'high'; empty or null clears it
 }
 
 export type UpdateResult = { ok: true; tasks: readonly Task[] } | { ok: false; error: string };
@@ -109,6 +111,20 @@ export function updateTask(tasks: readonly Task[], id: string, patch: TaskPatch)
       return title;
     }
     changed.title = title.title;
+  }
+  if (patch.dueDate !== undefined) {
+    const dueDate = patch.dueDate || null;
+    if (dueDate !== null && !isCalendarDate(dueDate)) {
+      return { ok: false, error: INVALID_DUE_DATE };
+    }
+    changed.dueDate = dueDate;
+  }
+  if (patch.priority !== undefined) {
+    const priority = patch.priority || null;
+    if (priority !== null && !isPriority(priority)) {
+      return { ok: false, error: INVALID_PRIORITY };
+    }
+    changed.priority = priority;
   }
   const next = [...tasks];
   next[index] = changed;

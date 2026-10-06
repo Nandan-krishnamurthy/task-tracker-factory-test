@@ -67,10 +67,7 @@ export function ensureLayout(root: HTMLElement): Layout {
   const priority = document.createElement('select');
   priority.id = PRIORITY_ID;
   priority.name = 'priority';
-  const choices: [string, string][] = [['', 'No priority'], ...Object.entries(PRIORITY_NAMES)];
-  for (const [value, text] of choices) {
-    priority.append(new Option(text, value));
-  }
+  priority.append(...priorityOptions());
 
   const button = document.createElement('button');
   button.type = 'submit';
@@ -118,6 +115,11 @@ export function render(root: HTMLElement, state: AppState): void {
 }
 
 const PRIORITY_NAMES: Record<Priority, string> = { low: 'Low', medium: 'Medium', high: 'High' };
+
+function priorityOptions(): HTMLOptionElement[] {
+  const choices: [string, string][] = [['', 'No priority'], ...Object.entries(PRIORITY_NAMES)];
+  return choices.map(([value, text]) => new Option(text, value));
+}
 
 function labelFor(id: string, text: string): HTMLLabelElement {
   const label = document.createElement('label');
@@ -194,13 +196,27 @@ function editItem(task: Task, error: string | null): HTMLLIElement {
   if (error) {
     input.setAttribute('aria-invalid', 'true');
   }
+  // The same date input and priority select as the add-task form, holding the current values.
+  const dueDate = Object.assign(document.createElement('input'), {
+    id: `edit-due-${task.id}`,
+    className: 'task-edit-due',
+    type: 'date',
+    value: task.dueDate ?? '',
+  });
+  const priority = Object.assign(document.createElement('select'), {
+    id: `edit-priority-${task.id}`,
+    className: 'task-edit-priority',
+  });
+  priority.append(...priorityOptions());
+  priority.value = task.priority ?? '';
   const save = Object.assign(document.createElement('button'), { type: 'submit', textContent: 'Save' });
   const cancel = Object.assign(document.createElement('button'), {
     type: 'button',
     className: 'task-edit-cancel',
     textContent: 'Cancel',
   });
-  form.append(labelFor(input.id, 'New title'), input, save, cancel, message);
+  form.append(labelFor(input.id, 'New title'), input, labelFor(dueDate.id, 'New due date'), dueDate,
+    labelFor(priority.id, 'New priority'), priority, save, cancel, message);
   const item = document.createElement('li');
   item.append(form);
   return item;
