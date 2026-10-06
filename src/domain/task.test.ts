@@ -144,6 +144,15 @@ describe('updateTask', () => {
     expect(result.tasks[0].completed).toBe(true);
   });
 
+  it('#10 AC4: clearing an existing priority removes only the priority', () => {
+    for (const priority of ['', null]) {
+      const result = updateTask(list, 'a', { priority });
+      if (!result.ok) throw new Error('expected ok');
+      expect(result.tasks).toEqual([{ ...list[0], priority: null }, list[1]]);
+    }
+    expect(list[0].priority).toBe('high'); // not mutated
+  });
+
   it('#10: rejects an invalid due date or priority, changing nothing', () => {
     expect(updateTask(list, 'a', { dueDate: '2026-02-30' })).toEqual({ ok: false, error: INVALID_DUE_DATE });
     expect(updateTask(list, 'a', { priority: 'urgent' })).toEqual({ ok: false, error: INVALID_PRIORITY });
