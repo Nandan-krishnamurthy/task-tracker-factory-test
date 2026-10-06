@@ -169,6 +169,13 @@ function taskItem(task: Task): HTMLLIElement {
   edit.textContent = 'Edit';
   edit.setAttribute('aria-label', `Edit ${task.title}`); // tells the rows' Edit buttons apart
   item.append(' ', edit);
+  const remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'task-delete';
+  remove.dataset.id = task.id;
+  remove.textContent = 'Delete';
+  remove.setAttribute('aria-label', `Delete ${task.title}`);
+  item.append(' ', remove);
   return item;
 }
 
