@@ -47,8 +47,9 @@ export function bindEvents(root: HTMLElement, controller: Controller): void {
     event.preventDefault();
     const form = event.target as HTMLFormElement;
     const id = form.dataset.id!;
-    const title = form.querySelector<HTMLInputElement>('.task-edit-title')!.value;
-    (controller.editTask(id, title) ? focusEdit : focusField)(id);
+    const field = (name: string) => form.querySelector<HTMLInputElement>(`.task-edit-${name}`)!.value;
+    const details = { dueDate: field('due'), priority: field('priority') };
+    (controller.editTask(id, field('title'), details) ? focusEdit : focusField)(id);
   });
   list.addEventListener('keydown', (event) => {
     const id = (event.target as Element).closest<HTMLElement>('.task-edit-form')?.dataset.id;

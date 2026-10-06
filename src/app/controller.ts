@@ -1,5 +1,12 @@
 import type { View } from '../domain/filter';
-import { createTask, setCompleted, updateTask, type NewTask, type Task } from '../domain/task';
+import {
+  createTask,
+  setCompleted,
+  updateTask,
+  type NewTask,
+  type Task,
+  type TaskPatch,
+} from '../domain/task';
 import { saveTasks } from '../storage/taskStore';
 
 export interface AppState {
@@ -33,8 +40,8 @@ export interface Controller {
   setView(view: View): void;
   /** Opens the inline edit form of a task. */
   startEdit(id: string): void;
-  /** Saves a new title; returns false (keeping the old title and the form open) if it is invalid. */
-  editTask(id: string, title: string): boolean;
+  /** Saves the edited fields; returns false (keeping the old values and the form open) if one is invalid. */
+  editTask(id: string, title: string, details?: Omit<TaskPatch, 'title'>): boolean;
   /** Closes the edit form without changing the task. */
   cancelEdit(): void;
   state(): AppState;
@@ -75,8 +82,8 @@ export function createController({ tasks, storage, render, now, newId }: Control
     startEdit(id) {
       update({ ...current, editing: { id, error: null } });
     },
-    editTask(id, title) {
-      const result = updateTask(current.tasks, id, { title });
+    editTask(id, title, details = {}) {
+      const result = updateTask(current.tasks, id, { ...details, title });
       if (!result.ok) {
         update({ ...current, editing: { id, error: result.error } });
         return false;
