@@ -1,6 +1,7 @@
 import type { View } from '../domain/filter';
 import {
   createTask,
+  deleteTask,
   setCompleted,
   updateTask,
   type NewTask,
@@ -44,6 +45,8 @@ export interface Controller {
   editTask(id: string, title: string, details?: Omit<TaskPatch, 'title'>): boolean;
   /** Closes the edit form without changing the task. */
   cancelEdit(): void;
+  /** Deletes a task at once, with no confirmation (REQ-011). */
+  removeTask(id: string): void;
   state(): AppState;
 }
 
@@ -93,6 +96,10 @@ export function createController({ tasks, storage, render, now, newId }: Control
     },
     cancelEdit() {
       update({ ...current, editing: undefined });
+    },
+    removeTask(id) {
+      const editing = current.editing?.id === id ? undefined : current.editing;
+      update({ ...current, tasks: deleteTask(current.tasks, id), editing });
     },
     state: () => current,
   };

@@ -32,6 +32,15 @@ export function bindEvents(root: HTMLElement, controller: Controller): void {
     controller.cancelEdit();
     focusEdit(id);
   };
+  // After a delete, focus goes to the Delete button now in the deleted row's place (or the new last
+  // one), or to the title field when the view is empty (REQ-016).
+  const remove = (id: string) => {
+    const before = [...list.querySelectorAll<HTMLElement>('.task-delete')];
+    const index = before.findIndex((b) => b.dataset.id === id);
+    controller.removeTask(id);
+    const after = [...list.querySelectorAll<HTMLElement>('.task-delete')];
+    (after[Math.min(index, after.length - 1)] ?? input).focus();
+  };
   list.addEventListener('click', (event) => {
     const button = event.target instanceof HTMLButtonElement ? event.target : null;
     const id = button?.closest<HTMLElement>('[data-id]')?.dataset.id;
@@ -40,6 +49,8 @@ export function bindEvents(root: HTMLElement, controller: Controller): void {
       focusField(id);
     } else if (id && button?.classList.contains('task-edit-cancel')) {
       cancel(id);
+    } else if (id && button?.classList.contains('task-delete')) {
+      remove(id);
     }
   });
   // Only the rows' edit forms are inside the list; the add-task form is not.

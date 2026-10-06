@@ -130,3 +130,9 @@ export function updateTask(tasks: readonly Task[], id: string, patch: TaskPatch)
   next[index] = changed;
   return { ok: true, tasks: next };
 }
+
+/** Removes the task `id`; the others keep their order. Never mutates `tasks`; an unknown id returns it unchanged. */
+export function deleteTask(tasks: readonly Task[], id: string): readonly Task[] {
+  const next = tasks.filter((task) => task.id !== id);
+  return next.length === tasks.length ? tasks : next;
+}

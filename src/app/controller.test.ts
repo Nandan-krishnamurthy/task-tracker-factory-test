@@ -218,3 +218,55 @@ describe('controller editing', () => {
     expect(controller.state().tasks[0].title).toBe('Buy milk');
   });
 });
+
+describe('controller deleting', () => {
+  function deleting() {
+    const items = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => items.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        items.set(key, value);
+      },
+    };
+    const render = vi.fn<(state: AppState) => void>();
+    let n = 0;
+    const controller = createController({
+      tasks: [],
+      storage,
+      render,
+      now: () => new Date('2026-09-25T08:00:00.000Z'),
+      newId: () => `id-${++n}`,
+    });
+    controller.addTask('Buy milk');
+    controller.addTask('Walk dog');
+    return { controller, storage, render };
+  }
+
+  it('#11 AC1: removeTask removes an active task at once and renders', () => {
+    const { controller, render } = deleting();
+    controller.removeTask('id-1');
+    expect(controller.state().tasks.map((t) => t.title)).toEqual(['Walk dog']);
+    expect(render).toHaveBeenLastCalledWith(controller.state());
+  });
+
+  it('#11 AC2: removeTask removes a completed task', () => {
+    const { controller } = deleting();
+    controller.toggleTask('id-2', true);
+    controller.setView('completed');
+    controller.removeTask('id-2');
+    expect(controller.state().tasks.map((t) => t.title)).toEqual(['Buy milk']);
+  });
+
+  it('#11 AC3: the deletion is saved, and the task is gone when loaded again', () => {
+    const { controller, storage } = deleting();
+    controller.removeTask('id-1');
+    expect(loadTasks(storage).tasks.map((t) => t.title)).toEqual(['Walk dog']);
+  });
+
+  it('#11: deleting the task being edited closes its edit form', () => {
+    const { controller } = deleting();
+    controller.startEdit('id-1');
+    controller.removeTask('id-1');
+    expect(controller.state().editing).toBeUndefined();
+  });
+});
