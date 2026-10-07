@@ -65,3 +65,4 @@
 2026-10-07T09:14:25Z S05 002-add-due-dates stories STORY-013..STORY-014
 2026-10-07T09:28:34Z S07 002-add-due-dates #27 branch story/27-overdue-label
 2026-10-07T09:30:15Z S08 002-add-due-dates #27 implement
+2026-10-07T10:21:22Z S09 002-add-due-dates #27 tests pass (unit 117 passed; e2e 70 passed)

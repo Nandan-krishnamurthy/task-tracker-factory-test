@@ -324,3 +324,53 @@ describe('inline editing', () => {
     expect(document.activeElement).toBe(editButton());
   });
 });
+
+describe('render overdue label', () => {
+  const task = (id: string, dueDate: string | null, completed = false) => ({
+    id,
+    title: `Task ${id}`,
+    dueDate,
+    priority: null,
+    completed,
+    createdAt: '',
+  });
+  const overdue = (id: string) => {
+    const row = [...root.querySelectorAll('#task-list li')].find(
+      (li) => li.querySelector('.task-title')!.textContent === `Task ${id}`,
+    )!;
+    return row.querySelector('.task-overdue');
+  };
+
+  it('#27 AC1: an active task due before today shows "Overdue" after its due date', () => {
+    render(root, { tasks: [task('a', '2026-10-06')], validationMessage: null, today: '2026-10-07' });
+    const label = overdue('a')!;
+    expect(label.textContent).toBe('Overdue');
+    expect(label.previousElementSibling!.className).toBe('task-due');
+  });
+
+  it('#27 AC2: tasks due today, later or never show no label', () => {
+    const tasks = [task('a', '2026-10-07'), task('b', '2026-10-08'), task('c', null)];
+    render(root, { tasks, validationMessage: null, today: '2026-10-07' });
+    expect(['a', 'b', 'c'].map(overdue)).toEqual([null, null, null]);
+  });
+
+  it('#27 AC3: a completed task in the Completed view shows no label', () => {
+    render(root, {
+      tasks: [task('a', '2026-10-06', true)],
+      validationMessage: null,
+      view: 'completed',
+      today: '2026-10-07',
+    });
+    expect(overdue('a')).toBeNull();
+  });
+
+  it('#27 AC5: without today no label is shown, and the due text and order are unchanged', () => {
+    const tasks = [task('b', '2026-10-08'), task('a', '2026-10-06')];
+    render(root, { tasks, validationMessage: null });
+    expect(overdue('a')).toBeNull();
+    render(root, { tasks, validationMessage: null, today: '2026-10-07' });
+    const rows = [...root.querySelectorAll('#task-list li')];
+    expect(rows.map((li) => li.querySelector('.task-title')!.textContent)).toEqual(['Task a', 'Task b']);
+    expect(rows[0].querySelector('.task-due')!.textContent).toMatch(/^Due /);
+  });
+});

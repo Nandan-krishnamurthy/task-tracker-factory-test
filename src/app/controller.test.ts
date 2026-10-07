@@ -280,3 +280,26 @@ describe('controller deleting', () => {
     expect(controller.state().editing).toBeUndefined();
   });
 });
+
+describe('controller today', () => {
+  it('#27 AC1: the state carries the local date of the injected clock', () => {
+    const { controller } = setup();
+    expect(controller.state().today).toBe('2026-09-25');
+  });
+
+  it('#27 AC4: every rendered state reads the clock again', () => {
+    let clock = new Date(2026, 9, 7, 23, 59);
+    const render = vi.fn<(state: AppState) => void>();
+    const controller = createController({
+      tasks: [],
+      storage: { setItem: vi.fn() },
+      render,
+      now: () => clock,
+      newId: () => 'id-1',
+    });
+    expect(controller.state().today).toBe('2026-10-07');
+    clock = new Date(2026, 9, 8, 0, 1);
+    controller.addTask('Pay rent', { dueDate: '2026-10-07' });
+    expect(render).toHaveBeenLastCalledWith(expect.objectContaining({ today: '2026-10-08' }));
+  });
+});
