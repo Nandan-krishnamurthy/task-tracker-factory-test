@@ -27,7 +27,12 @@ describe('controller.addTask', () => {
   it('#3 AC3: an empty title adds nothing and sets the validation message', () => {
     const { controller, render } = setup();
     expect(controller.addTask('  ')).toBe(false);
-    expect(controller.state()).toEqual({ tasks: [], validationMessage: TITLE_REQUIRED, view: 'active' });
+    expect(controller.state()).toEqual({
+      tasks: [],
+      validationMessage: TITLE_REQUIRED,
+      view: 'active',
+      today: '2026-09-25',
+    });
     expect(render).toHaveBeenCalledTimes(1);
   });
 
@@ -84,7 +89,12 @@ describe('controller persistence', () => {
   });
 
   it('#4 AC4: with nothing stored, the controller starts with an empty list and no message', () => {
-    expect(persistent().controller.state()).toEqual({ tasks: [], validationMessage: null, view: 'active' });
+    expect(persistent().controller.state()).toEqual({
+      tasks: [],
+      validationMessage: null,
+      view: 'active',
+      today: '2026-09-25',
+    });
   });
 
   it('#9 AC5: an edited title is saved, and is shown when loaded again', () => {
@@ -268,5 +278,28 @@ describe('controller deleting', () => {
     controller.startEdit('id-1');
     controller.removeTask('id-1');
     expect(controller.state().editing).toBeUndefined();
+  });
+});
+
+describe('controller today', () => {
+  it('#27 AC1: the state carries the local date of the injected clock', () => {
+    const { controller } = setup();
+    expect(controller.state().today).toBe('2026-09-25');
+  });
+
+  it('#27 AC4: every rendered state reads the clock again', () => {
+    let clock = new Date(2026, 9, 7, 23, 59);
+    const render = vi.fn<(state: AppState) => void>();
+    const controller = createController({
+      tasks: [],
+      storage: { setItem: vi.fn() },
+      render,
+      now: () => clock,
+      newId: () => 'id-1',
+    });
+    expect(controller.state().today).toBe('2026-10-07');
+    clock = new Date(2026, 9, 8, 0, 1);
+    controller.addTask('Pay rent', { dueDate: '2026-10-07' });
+    expect(render).toHaveBeenLastCalledWith(expect.objectContaining({ today: '2026-10-08' }));
   });
 });

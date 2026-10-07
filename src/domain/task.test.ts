@@ -5,6 +5,8 @@ import {
   INVALID_DUE_DATE,
   INVALID_PRIORITY,
   isCalendarDate,
+  isOverdue,
+  localDate,
   TITLE_REQUIRED,
   updateTask,
   validateTitle,
@@ -183,5 +185,37 @@ describe('deleteTask', () => {
 
   it('#11: returns the list unchanged for an unknown id', () => {
     expect(deleteTask(list, 'missing')).toBe(list);
+  });
+});
+
+describe('localDate and isOverdue', () => {
+  const task = (dueDate: string | null, completed = false): Task => ({
+    id: 'a',
+    title: 'Pay rent',
+    dueDate,
+    priority: null,
+    completed,
+    createdAt: '',
+  });
+
+  it('#27 AC1: today is the local calendar day, just after and just before midnight', () => {
+    expect(localDate(new Date(2026, 9, 7, 0, 0, 1))).toBe('2026-10-07');
+    expect(localDate(new Date(2026, 9, 7, 23, 59, 59))).toBe('2026-10-07');
+    expect(localDate(new Date(2026, 0, 5, 12))).toBe('2026-01-05');
+  });
+
+  it('#27 AC1: an open task due before today is overdue', () => {
+    expect(isOverdue(task('2026-10-06'), '2026-10-07')).toBe(true);
+    expect(isOverdue(task('2025-12-31'), '2026-01-01')).toBe(true);
+  });
+
+  it('#27 AC2: a task due today, later, or with no due date is not overdue', () => {
+    expect(isOverdue(task('2026-10-07'), '2026-10-07')).toBe(false);
+    expect(isOverdue(task('2026-10-08'), '2026-10-07')).toBe(false);
+    expect(isOverdue(task(null), '2026-10-07')).toBe(false);
+  });
+
+  it('#27 AC3: a completed task is never overdue', () => {
+    expect(isOverdue(task('2026-10-06', true), '2026-10-07')).toBe(false);
   });
 });
