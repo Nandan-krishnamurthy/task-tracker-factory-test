@@ -61,3 +61,4 @@
 2026-10-07T09:07:20Z S01 002-add-due-dates discovery baseline green null:lint
 2026-10-07T09:10:21Z S02 002-add-due-dates requirements REQ-022..REQ-026
 2026-10-07T09:11:47Z S03 002-add-due-dates architecture
+2026-10-07T09:12:52Z S04 002-add-due-dates plan
