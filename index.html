@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Task Tracker</title>
+    <style>
+      /* Rows off screen skip layout, so changes show fast with hundreds of tasks (REQ-019). */
+      #task-list > li {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 2.5em;
+      }
+    </style>
   </head>
   <body>
     <div id="app"></div>
