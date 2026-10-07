@@ -20,7 +20,7 @@ export interface AppState {
   readonly editing?: { readonly id: string; readonly error: string | null };
   /** Set while the last save failed: the tasks are shown but may not be stored. */
   readonly storageWarning?: string;
-  /** Today's local date (`YYYY-MM-DD`), added to each rendered state for the overdue label (REQ-022). */
+  /** Today's local date (`YYYY-MM-DD`), read on every update, for the overdue label (REQ-022). */
   readonly today?: string;
 }
 
@@ -55,7 +55,7 @@ export interface Controller {
 
 export function createController({ tasks, storage, render, now, newId }: ControllerDeps): Controller {
   // The app always opens on Active; the view is not stored.
-  let current: AppState = { tasks, validationMessage: null, view: 'active' };
+  let current: AppState = { tasks, validationMessage: null, view: 'active', today: localDate(now()) };
 
   // The single save path: every change to the tasks is saved before rendering (REQ-013).
   // A failed save keeps the change in memory and shows a warning until a save succeeds.
@@ -64,9 +64,9 @@ export function createController({ tasks, storage, render, now, newId }: Control
       const saved = saveTasks(storage, next.tasks);
       next = { ...next, storageWarning: saved.ok ? undefined : SAVE_WARNING };
     }
-    current = next;
-    // Today is read on every render, so each action refreshes the overdue labels (REQ-025).
-    render({ ...current, today: localDate(now()) });
+    // Today is read on every update, so each action refreshes the overdue labels (REQ-025).
+    current = { ...next, today: localDate(now()) };
+    render(current);
   }
 
   return {
