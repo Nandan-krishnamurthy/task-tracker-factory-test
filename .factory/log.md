@@ -59,3 +59,4 @@
 2026-10-07T07:13:16Z S11 001-initial #13 PR #25
 2026-10-07T09:04:02Z S00 002-add-due-dates intake
 2026-10-07T09:07:20Z S01 002-add-due-dates discovery baseline green null:lint
+2026-10-07T09:10:21Z S02 002-add-due-dates requirements REQ-022..REQ-026
