@@ -57,3 +57,9 @@
 2026-10-07T07:07:36Z S08 001-initial #13 implement
 2026-10-07T07:09:20Z S09 001-initial #13 tests pass (unit 107 passed; e2e 65 passed)
 2026-10-07T07:13:16Z S11 001-initial #13 PR #25
+2026-10-07T09:04:02Z S00 002-add-due-dates intake
+2026-10-07T09:07:20Z S01 002-add-due-dates discovery baseline green null:lint
+2026-10-07T09:10:21Z S02 002-add-due-dates requirements REQ-022..REQ-026
+2026-10-07T09:11:47Z S03 002-add-due-dates architecture
+2026-10-07T09:12:52Z S04 002-add-due-dates plan
+2026-10-07T09:14:25Z S05 002-add-due-dates stories STORY-013..STORY-014
