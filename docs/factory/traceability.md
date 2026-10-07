@@ -29,3 +29,8 @@ Status is one of: `Not started`, `In progress`, `Implemented`, `Deferred`.
 | REQ-019 | STORY-012 (#13) | #25 | `#13 AC1: with 500 tasks stored, an added task appears within 100 ms`; `#13 AC2: with 500 tasks stored, completing a task is shown within 100 ms`; `#13 AC2: with 500 tasks stored, reopening a task is shown within 100 ms`; `#13 AC2: with 500 tasks stored, an edit is shown within 100 ms`; `#13 AC2: with 500 tasks stored, deleting a task is shown within 100 ms` | Implemented |
 | REQ-020 | STORY-004 (#5) | #17 | `#5 AC1: text that is not JSON gives an empty list, and a task can be added`; `#5 AC2: a wrong version / tasks not a list / a task with an invalid field gives an empty list without crashing`; `#5 AC4: opening the app with corrupted data and changing nothing leaves it as it was`; `#5 AC4: loading never writes, so corrupted data stays as it was` | Implemented |
 | REQ-021 | STORY-001 (#2) | #14 | `#2 AC1: the build writes index.html and its assets to dist/`; `#2 AC3 AC4: shows the heading and requests only its own files` | Implemented |
+| REQ-022 | STORY-013 | — | — | Not started |
+| REQ-023 | STORY-013 | — | — | Not started |
+| REQ-024 | STORY-013 | — | — | Not started |
+| REQ-025 | STORY-013 | — | — | Not started |
+| REQ-026 | STORY-014 | — | — | Not started |

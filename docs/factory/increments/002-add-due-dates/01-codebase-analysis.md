@@ -68,4 +68,4 @@ Green.
 - The change request "Add due dates to tasks" is already satisfied by the existing code (REQ-003, REQ-009, REQ-012, REQ-014). S02 must settle with the human what new behaviour, if any, is wanted (for example overdue highlighting, a "due soon" view, relative dates or a time of day) rather than re-implement existing features. This is an ambiguous requirement (rule H6).
 - `discover` proposed `npm ci` for install; the config value (`npm ci && npx playwright install chromium`) is kept because the e2e tests need the Chromium browser.
 - Lint stays `null`; PRs must say that the lint gate is skipped.
-- Next free IDs: REQ-022, STORY-013.
+- The next free requirement and story IDs come from `python scripts/factory.py increment show` (REQ-022 was next when this analysis was written).
