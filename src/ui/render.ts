@@ -1,7 +1,7 @@
 import type { AppState } from '../app/controller';
 import { tasksForView, type View } from '../domain/filter';
 import { sortTasks } from '../domain/sort';
-import type { Priority, Task } from '../domain/task';
+import { isOverdue, type Priority, type Task } from '../domain/task';
 
 export interface Layout {
   form: HTMLFormElement;
@@ -109,7 +109,7 @@ export function render(root: HTMLElement, state: AppState): void {
     button.setAttribute('aria-pressed', String(name === view));
   }
   const rows = sortTasks(tasksForView(state.tasks, view)).map((task) =>
-    task.id === state.editing?.id ? editItem(task, state.editing.error) : taskItem(task),
+    task.id === state.editing?.id ? editItem(task, state.editing.error) : taskItem(task, state.today),
   );
   list.replaceChildren(...rows);
 }
@@ -136,7 +136,7 @@ function viewButton(view: View, text: string): HTMLButtonElement {
   return button;
 }
 
-function taskItem(task: Task): HTMLLIElement {
+function taskItem(task: Task, today: string | undefined): HTMLLIElement {
   const item = document.createElement('li');
   const done = document.createElement('input');
   done.type = 'checkbox';
@@ -155,6 +155,13 @@ function taskItem(task: Task): HTMLLIElement {
     due.dateTime = task.dueDate;
     due.textContent = `Due ${formatDate(task.dueDate)}`;
     item.append(' ', due);
+  }
+  // Text, not colour alone, marks an open task whose due date has passed (REQ-022, REQ-024).
+  if (today && isOverdue(task, today)) {
+    const overdue = document.createElement('span');
+    overdue.className = 'task-overdue';
+    overdue.textContent = 'Overdue';
+    item.append(' ', overdue);
   }
   if (task.priority) {
     const priority = document.createElement('span');

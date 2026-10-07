@@ -64,3 +64,4 @@
 2026-10-07T09:12:52Z S04 002-add-due-dates plan
 2026-10-07T09:14:25Z S05 002-add-due-dates stories STORY-013..STORY-014
 2026-10-07T09:28:34Z S07 002-add-due-dates #27 branch story/27-overdue-label
+2026-10-07T09:30:15Z S08 002-add-due-dates #27 implement

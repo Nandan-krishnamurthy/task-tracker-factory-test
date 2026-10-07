@@ -45,6 +45,17 @@ export function isCalendarDate(value: unknown): value is string {
   );
 }
 
+/** The local calendar day of `now` as `YYYY-MM-DD`; local parts, not `toISOString` (UTC). */
+export function localDate(now: Date): string {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+/** An open task whose due date is before `today` (`YYYY-MM-DD`); ISO dates compare as strings. */
+export function isOverdue(task: Task, today: string): boolean {
+  return !task.completed && task.dueDate !== null && task.dueDate < today;
+}
+
 export type CreateResult =
   | { ok: true; tasks: Task[]; task: Task }
   | { ok: false; error: string };

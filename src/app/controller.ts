@@ -2,6 +2,7 @@ import type { View } from '../domain/filter';
 import {
   createTask,
   deleteTask,
+  localDate,
   setCompleted,
   updateTask,
   type NewTask,
@@ -19,6 +20,8 @@ export interface AppState {
   readonly editing?: { readonly id: string; readonly error: string | null };
   /** Set while the last save failed: the tasks are shown but may not be stored. */
   readonly storageWarning?: string;
+  /** Today's local date (`YYYY-MM-DD`), added to each rendered state for the overdue label (REQ-022). */
+  readonly today?: string;
 }
 
 export const SAVE_WARNING = 'Your changes may not be saved: this browser could not store them.';
@@ -62,7 +65,8 @@ export function createController({ tasks, storage, render, now, newId }: Control
       next = { ...next, storageWarning: saved.ok ? undefined : SAVE_WARNING };
     }
     current = next;
-    render(current);
+    // Today is read on every render, so each action refreshes the overdue labels (REQ-025).
+    render({ ...current, today: localDate(now()) });
   }
 
   return {
