@@ -155,3 +155,83 @@ test('#12 AC5: every focused element shows a visible focus indicator', async ({ 
   await list(page).getByRole('button', { name: 'Edit Buy milk' }).click();
   await expectVisibleFocus(page);
 });
+
+/** WCAG contrast ratio of two `rgb(r, g, b)` colours. */
+function contrast(a: string, b: string): number {
+  const luminance = (rgb: string) => {
+    const [r, g, bl] = rgb.match(/\d+(\.\d+)?/g)!.slice(0, 3).map((c) => {
+      const s = Number(c) / 255;
+      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  };
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+test.describe('overdue label', () => {
+  test.beforeEach(async ({ page }) => {
+    // Today is 2026-10-07 on the device, as in the STORY-013 tests.
+    await page.clock.setFixedTime(new Date(2026, 9, 7, 10, 0));
+    await page.goto('/');
+  });
+
+  async function addDue(page: Page, name: string, due: string) {
+    await page.getByLabel('Task title').fill(name);
+    await page.getByLabel('Due date', { exact: true }).fill(due);
+    await page.getByLabel('Task title').press('Enter');
+    await expect(titles(page).getByText(name, { exact: true })).toHaveCount(1);
+  }
+
+  test('#28 AC1: the Overdue label has its own style with AA contrast', async ({ page }) => {
+    await addDue(page, 'Pay rent', '2026-10-06');
+    const label = list(page).locator('.task-overdue');
+    await expect(label).toHaveText('Overdue');
+    const styles = await label.evaluate((el) => {
+      const own = getComputedStyle(el);
+      const title = getComputedStyle(el.parentElement!.querySelector('.task-title')!);
+      // The nearest ancestor with a painted background; none means the white canvas.
+      let bg = 'rgb(255, 255, 255)';
+      for (let node: Element | null = el; node; node = node.parentElement) {
+        const color = getComputedStyle(node).backgroundColor;
+        if (color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent') {
+          bg = color;
+          break;
+        }
+      }
+      return {
+        color: own.color,
+        weight: own.fontWeight,
+        titleColor: title.color,
+        titleWeight: title.fontWeight,
+        bg,
+      };
+    });
+    expect([styles.color, styles.weight]).not.toEqual([styles.titleColor, styles.titleWeight]);
+    expect(contrast(styles.color, styles.bg)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  test('#28 AC2: axe reports no violations with an overdue task in the Active view', async ({ page }) => {
+    await addDue(page, 'Pay rent', '2026-10-06');
+    await expect(list(page).locator('.task-overdue')).toHaveText('Overdue');
+    await expectNoViolations(page);
+  });
+
+  test('#28 AC3: axe reports no violations with a past-dated task in the Completed view', async ({ page }) => {
+    await addDue(page, 'Pay rent', '2026-10-01');
+    await page.getByRole('checkbox', { name: 'Done: Pay rent' }).click();
+    await view(page, 'Completed').click();
+    await expect(titles(page)).toHaveText(['Pay rent']);
+    await expectNoViolations(page);
+  });
+
+  test('#28 AC4: the overdue row is read with its title and "Overdue"', async ({ page }) => {
+    await addDue(page, 'Pay rent', '2026-10-06');
+    const row = list(page).getByRole('listitem').filter({ hasText: 'Pay rent' });
+    await expect(row).toContainText('Pay rent');
+    await expect(row).toContainText('Overdue');
+    const snapshot = await row.ariaSnapshot();
+    expect(snapshot).toContain('Pay rent');
+    expect(snapshot).toContain('Overdue');
+  });
+});

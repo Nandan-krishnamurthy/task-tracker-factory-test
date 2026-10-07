@@ -33,4 +33,4 @@ Status is one of: `Not started`, `In progress`, `Implemented`, `Deferred`.
 | REQ-023 | STORY-013 (#27) | #29 | `#27 AC2: tasks due today, tomorrow or never are not marked`; `#27 AC2: a task due today, later, or with no due date is not overdue`; `#27 AC2: tasks due today, later or never show no label` | Implemented |
 | REQ-024 | STORY-013 (#27) | #29 | `#27 AC3: completing removes the label, and reopening shows it again`; `#27 AC3: a completed task is never overdue`; `#27 AC3: a completed task in the Completed view shows no label` | Implemented |
 | REQ-025 | STORY-013 (#27) | #29 | `#27 AC4: editing the due date shows or removes the label at once`; `#27 AC4: every rendered state reads the clock again` | Implemented |
-| REQ-026 | STORY-014 | — | — | Not started |
+| REQ-026 | STORY-014 (#28) | #30 | `#28 AC1: the Overdue label has its own style with AA contrast`; `#28 AC2: axe reports no violations with an overdue task in the Active view`; `#28 AC3: axe reports no violations with a past-dated task in the Completed view`; `#28 AC4: the overdue row is read with its title and "Overdue"` | Implemented |
