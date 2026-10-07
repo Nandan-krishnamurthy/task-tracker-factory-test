@@ -229,12 +229,12 @@ function editItem(task: Task, error: string | null): HTMLLIElement {
   return item;
 }
 
+// One formatter for every row: toLocaleDateString builds a new one per call, which is too slow
+// for 500 rows on every render (REQ-019).
+const DATE_FORMAT = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+
 /** The calendar day in the user's locale. Built from its parts, so no time zone can shift it. */
 function formatDate(isoDate: string): string {
   const [year, month, day] = isoDate.split('-').map(Number);
-  return new Date(year, month - 1, day).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  return DATE_FORMAT.format(new Date(year, month - 1, day));
 }
