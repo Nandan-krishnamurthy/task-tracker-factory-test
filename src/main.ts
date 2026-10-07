@@ -10,10 +10,13 @@ if (!root) {
   throw new Error('Missing #app root element');
 }
 
+// The heading sits in a banner landmark, so that all content is inside a landmark.
+const header = document.createElement('header');
 const heading = document.createElement('h1');
 heading.textContent = APP_TITLE;
+header.append(heading);
 const main = document.createElement('main');
-root.replaceChildren(heading, main);
+root.replaceChildren(header, main);
 
 const controller = createController({
   tasks: loadTasks(localStorage).tasks,
