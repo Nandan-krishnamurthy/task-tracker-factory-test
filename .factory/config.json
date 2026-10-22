@@ -11,6 +11,7 @@
     "typecheck": "npm run typecheck",
     "test": "npm test"
   },
+  "test_reports": ["reports/vitest.json"],
   "limits": {
     "max_fix_attempts": 3,
     "max_review_rounds": 3,
