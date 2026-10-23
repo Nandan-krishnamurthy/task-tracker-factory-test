@@ -73,3 +73,4 @@
 2026-10-07T10:57:27Z S11 002-add-due-dates #28 PR #30
 2026-10-23T06:17:40Z S00 003-priority-filter intake
 2026-10-23T06:22:51Z S01 003-priority-filter discovery baseline green null:lint
+2026-10-23T06:26:51Z S02 003-priority-filter requirements REQ-027..REQ-034
