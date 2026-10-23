@@ -73,4 +73,4 @@ Green.
 - The rule "a task is listed when it is in the view and matches the priority filter" is pure logic that fits `src/domain/filter.ts` next to `tasksForView`, so it can be checked by unit tests alone; its results are read from `reports/vitest.json`.
 - `discover` proposed `npm ci` for install; the config value (`npm ci && npx playwright install chromium`) is kept because the e2e tests need the Chromium browser.
 - Lint stays `null`; PRs must say that the lint gate is skipped.
-- The next free requirement and story IDs are REQ-027 and STORY-015 (`increment next`).
+- The next free requirement and story IDs come from `python scripts/factory.py increment show` (this analysis names no unallocated ID, because the ID scanner counts mentions in these documents).
