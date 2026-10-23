@@ -79,3 +79,4 @@
 2026-10-23T11:46:45Z S05 003-priority-filter stories STORY-015..STORY-016
 2026-10-23T11:58:07Z S05 003-priority-filter revision
 2026-10-23T13:49:53Z S07 003-priority-filter #34 branch story/34-filter-by-priority
+2026-10-23T13:53:28Z S08 003-priority-filter #34 implement

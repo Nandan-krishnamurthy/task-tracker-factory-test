@@ -1,8 +1,9 @@
 import type { Controller } from '../app/controller';
+import { PRIORITY_FILTERS } from '../domain/filter';
 import { ensureLayout } from './render';
 
 export function bindEvents(root: HTMLElement, controller: Controller): void {
-  const { form, input, dueDate, priority, views, list } = ensureLayout(root);
+  const { form, input, dueDate, priority, views, priorityFilters, list } = ensureLayout(root);
   // A native form submit covers both Enter in the field and the Add button.
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -23,6 +24,9 @@ export function bindEvents(root: HTMLElement, controller: Controller): void {
   });
   views.active.addEventListener('click', () => controller.setView('active'));
   views.completed.addEventListener('click', () => controller.setView('completed'));
+  for (const filter of PRIORITY_FILTERS) {
+    priorityFilters[filter].addEventListener('click', () => controller.setPriorityFilter(filter));
+  }
 
   // Inline editing (architecture decision 8). Rendering rebuilds the rows, so focus is set afterwards.
   const focusEdit = (id: string) =>

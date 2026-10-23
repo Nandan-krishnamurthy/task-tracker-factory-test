@@ -1,5 +1,11 @@
 import type { AppState } from '../app/controller';
-import { tasksForView, type View } from '../domain/filter';
+import {
+  PRIORITY_FILTERS,
+  tasksForPriority,
+  tasksForView,
+  type PriorityFilter,
+  type View,
+} from '../domain/filter';
 import { sortTasks } from '../domain/sort';
 import { isOverdue, type Priority, type Task } from '../domain/task';
 
@@ -10,6 +16,7 @@ export interface Layout {
   priority: HTMLSelectElement;
   message: HTMLElement;
   views: Record<View, HTMLButtonElement>;
+  priorityFilters: Record<PriorityFilter, HTMLButtonElement>;
   list: HTMLUListElement;
   warning: HTMLElement;
 }
@@ -20,6 +27,7 @@ const DUE_ID = 'task-due-date';
 const PRIORITY_ID = 'task-priority';
 const MESSAGE_ID = 'task-title-message';
 const VIEWS_ID = 'task-views';
+const PRIORITY_FILTER_ID = 'task-priority-filter';
 const LIST_ID = 'task-list';
 const WARNING_ID = 'storage-warning';
 
@@ -37,6 +45,12 @@ export function ensureLayout(root: HTMLElement): Layout {
         active: root.querySelector<HTMLButtonElement>(`#${VIEWS_ID} [data-view="active"]`)!,
         completed: root.querySelector<HTMLButtonElement>(`#${VIEWS_ID} [data-view="completed"]`)!,
       },
+      priorityFilters: Object.fromEntries(
+        PRIORITY_FILTERS.map((filter) => [
+          filter,
+          root.querySelector<HTMLButtonElement>(`#${PRIORITY_FILTER_ID} [data-priority-filter="${filter}"]`)!,
+        ]),
+      ) as Record<PriorityFilter, HTMLButtonElement>,
       list: root.querySelector<HTMLUListElement>(`#${LIST_ID}`)!,
       warning: root.querySelector<HTMLElement>(`#${WARNING_ID}`)!,
     };
@@ -87,6 +101,17 @@ export function ensureLayout(root: HTMLElement): Layout {
   const views = { active: viewButton('active', 'Active'), completed: viewButton('completed', 'Completed') };
   viewGroup.append(views.active, views.completed);
 
+  // The priority filter (REQ-027): the same toggle-button pattern as the views. Its name is
+  // not just "Priority", which already names the add form's priority field.
+  const priorityGroup = document.createElement('div');
+  priorityGroup.id = PRIORITY_FILTER_ID;
+  priorityGroup.setAttribute('role', 'group');
+  priorityGroup.setAttribute('aria-label', 'Filter by priority');
+  const priorityFilters = Object.fromEntries(
+    PRIORITY_FILTERS.map((filter) => [filter, priorityFilterButton(filter)]),
+  ) as Record<PriorityFilter, HTMLButtonElement>;
+  priorityGroup.append(...PRIORITY_FILTERS.map((filter) => priorityFilters[filter]));
+
   const list = document.createElement('ul');
   list.id = LIST_ID;
   list.setAttribute('aria-label', 'Tasks');
@@ -96,19 +121,25 @@ export function ensureLayout(root: HTMLElement): Layout {
   warning.id = WARNING_ID;
   warning.setAttribute('role', 'alert');
 
-  root.append(warning, form, viewGroup, list);
-  return { form, input, dueDate, priority, message, views, list, warning };
+  root.append(warning, form, viewGroup, priorityGroup, list);
+  return { form, input, dueDate, priority, message, views, priorityFilters, list, warning };
 }
 
 export function render(root: HTMLElement, state: AppState): void {
-  const { message, views, list, warning } = ensureLayout(root);
+  const { message, views, priorityFilters, list, warning } = ensureLayout(root);
   const view = state.view ?? 'active';
+  const priorityFilter = state.priorityFilter ?? 'all';
   message.textContent = state.validationMessage ?? '';
   warning.textContent = state.storageWarning ?? '';
   for (const [name, button] of Object.entries(views)) {
     button.setAttribute('aria-pressed', String(name === view));
   }
-  const rows = sortTasks(tasksForView(state.tasks, view)).map((task) =>
+  for (const [name, button] of Object.entries(priorityFilters)) {
+    button.setAttribute('aria-pressed', String(name === priorityFilter));
+  }
+  // Filter first, then sort, so the matching tasks keep the REQ-012 order (REQ-029).
+  const shown = tasksForPriority(tasksForView(state.tasks, view), priorityFilter);
+  const rows = sortTasks(shown).map((task) =>
     task.id === state.editing?.id ? editItem(task, state.editing.error) : taskItem(task, state.today),
   );
   list.replaceChildren(...rows);
@@ -126,6 +157,20 @@ function labelFor(id: string, text: string): HTMLLabelElement {
   label.htmlFor = id;
   label.textContent = text;
   return label;
+}
+
+const PRIORITY_FILTER_NAMES: Record<PriorityFilter, string> = {
+  all: 'All',
+  ...PRIORITY_NAMES,
+  none: 'No priority',
+};
+
+function priorityFilterButton(filter: PriorityFilter): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.dataset.priorityFilter = filter;
+  button.textContent = PRIORITY_FILTER_NAMES[filter];
+  return button;
 }
 
 function viewButton(view: View, text: string): HTMLButtonElement {

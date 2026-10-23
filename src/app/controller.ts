@@ -1,4 +1,4 @@
-import type { View } from '../domain/filter';
+import type { PriorityFilter, View } from '../domain/filter';
 import {
   createTask,
   deleteTask,
@@ -16,6 +16,8 @@ export interface AppState {
   readonly validationMessage: string | null;
   /** The view shown (REQ-007). Absent means Active. */
   readonly view?: View;
+  /** The priority filter applied to the view (REQ-027, REQ-028). Absent means "all". */
+  readonly priorityFilter?: PriorityFilter;
   /** The task being edited in its row, and the message for a rejected title (REQ-008). */
   readonly editing?: { readonly id: string; readonly error: string | null };
   /** Set while the last save failed: the tasks are shown but may not be stored. */
@@ -42,6 +44,8 @@ export interface Controller {
   toggleTask(id: string, completed: boolean): void;
   /** Shows the Active or the Completed tasks (REQ-007). */
   setView(view: View): void;
+  /** Lists only the tasks of the view that match the filter (REQ-028); kept across views (REQ-030). */
+  setPriorityFilter(filter: PriorityFilter): void;
   /** Opens the inline edit form of a task. */
   startEdit(id: string): void;
   /** Saves the edited fields; returns false (keeping the old values and the form open) if one is invalid. */
@@ -54,8 +58,14 @@ export interface Controller {
 }
 
 export function createController({ tasks, storage, render, now, newId }: ControllerDeps): Controller {
-  // The app always opens on Active; the view is not stored.
-  let current: AppState = { tasks, validationMessage: null, view: 'active', today: localDate(now()) };
+  // The app always opens on Active with every priority (REQ-027); neither is stored.
+  let current: AppState = {
+    tasks,
+    validationMessage: null,
+    view: 'active',
+    priorityFilter: 'all',
+    today: localDate(now()),
+  };
 
   // The single save path: every change to the tasks is saved before rendering (REQ-013).
   // A failed save keeps the change in memory and shows a warning until a save succeeds.
@@ -85,6 +95,9 @@ export function createController({ tasks, storage, render, now, newId }: Control
     },
     setView(view) {
       update({ ...current, view });
+    },
+    setPriorityFilter(priorityFilter) {
+      update({ ...current, priorityFilter });
     },
     startEdit(id) {
       update({ ...current, editing: { id, error: null } });
