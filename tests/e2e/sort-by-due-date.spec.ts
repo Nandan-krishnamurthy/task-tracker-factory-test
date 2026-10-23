@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 const title = (page: Page) => page.getByLabel('Task title');
 const dueDate = (page: Page) => page.getByLabel('Due date');
-const priority = (page: Page) => page.getByLabel('Priority');
+const priority = (page: Page) => page.getByLabel('Priority', { exact: true });
 const list = (page: Page) => page.getByRole('list', { name: 'Tasks' });
 const titles = (page: Page) => list(page).locator('.task-title');
 

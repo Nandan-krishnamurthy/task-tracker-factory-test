@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 const title = (page: Page) => page.getByLabel('Task title');
 const dueDate = (page: Page) => page.getByLabel('Due date');
-const priority = (page: Page) => page.getByLabel('Priority');
+const priority = (page: Page) => page.getByLabel('Priority', { exact: true });
 const tasks = (page: Page) => page.getByRole('list', { name: 'Tasks' }).getByRole('listitem');
 const task = (page: Page, name: string) => tasks(page).filter({ hasText: name });
 

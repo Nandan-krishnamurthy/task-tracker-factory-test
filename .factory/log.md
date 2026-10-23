@@ -78,3 +78,12 @@
 2026-10-23T11:44:49Z S04 003-priority-filter plan
 2026-10-23T11:46:45Z S05 003-priority-filter stories STORY-015..STORY-016
 2026-10-23T11:58:07Z S05 003-priority-filter revision
+2026-10-23T13:49:53Z S07 003-priority-filter #34 branch story/34-filter-by-priority
+2026-10-23T13:53:28Z S08 003-priority-filter #34 implement
+2026-10-23T13:57:02Z S09 003-priority-filter #34 verify run
+2026-10-23T14:15:45Z S09 003-priority-filter #34 verify run
+2026-10-23T14:41:37Z S11 003-priority-filter #34 PR #37
+2026-10-23T15:27:07Z S08 003-priority-filter #34 rework round 1
+2026-10-23T15:28:10Z S09 003-priority-filter #34 verify run
+2026-10-23T15:48:56Z S08 003-priority-filter #34 rework round 1
+2026-10-23T15:49:50Z S09 003-priority-filter #34 verify run
