@@ -23,7 +23,7 @@ async function addTask(page: Page, name: string, level = '', due = '') {
 }
 
 async function expectPressed(page: Page, name: string) {
-  for (const choice of ['All', 'High', 'Medium', 'Low', 'No priority']) {
+  for (const choice of ['All', 'High', 'Medium', 'Low', 'None']) {
     await expect(filter(page, choice)).toHaveAttribute('aria-pressed', String(choice === name));
   }
 }
@@ -33,10 +33,10 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('#34 AC1: both views show the five filter choices in order, with All pressed', async ({ page }) => {
-  await expect(filters(page).getByRole('button')).toHaveText(['All', 'High', 'Medium', 'Low', 'No priority']);
+  await expect(filters(page).getByRole('button')).toHaveText(['All', 'High', 'Medium', 'Low', 'None']);
   await expectPressed(page, 'All');
   await view(page, 'Completed').click();
-  await expect(filters(page).getByRole('button')).toHaveText(['All', 'High', 'Medium', 'Low', 'No priority']);
+  await expect(filters(page).getByRole('button')).toHaveText(['All', 'High', 'Medium', 'Low', 'None']);
   await expectPressed(page, 'All');
 });
 
@@ -52,7 +52,7 @@ test('#34 AC2: each choice lists only the matching tasks of the view', async ({ 
   await expect(titles(page)).toHaveText(['Review notes']);
   await filter(page, 'Low').click();
   await expect(titles(page)).toHaveText(['Water plants']);
-  await filter(page, 'No priority').click();
+  await filter(page, 'None').click();
   await expect(titles(page)).toHaveText(['Call mum']);
   await filter(page, 'All').click();
   await expect(titles(page)).toHaveText(['Ship release', 'Review notes', 'Water plants', 'Call mum']);

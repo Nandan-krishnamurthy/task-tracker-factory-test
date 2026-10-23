@@ -54,7 +54,7 @@ describe('tasksForPriority', () => {
   });
   const mixed = [at('h1', 'high'), at('m1', 'medium'), at('l1', 'low'), at('n1', null), at('h2', 'high')];
 
-  it('#34 AC1: the choices are All, High, Medium, Low and No priority, in that order', () => {
+  it('#34 AC1: the choices are All, High, Medium, Low and None, in that order', () => {
     expect(PRIORITY_FILTERS).toEqual(['all', 'high', 'medium', 'low', 'none']);
   });
 
@@ -72,7 +72,7 @@ describe('tasksForPriority', () => {
     expect(ids(tasksForPriority(mixed, 'low'))).toEqual(['l1']);
   });
 
-  it('#34 AC2: "No priority" keeps only the tasks without a priority', () => {
+  it('#34 AC2: "None" keeps only the tasks without a priority', () => {
     expect(ids(tasksForPriority(mixed, 'none'))).toEqual(['n1']);
   });
 

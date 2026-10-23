@@ -408,7 +408,7 @@ describe('priority filter', () => {
       ['High', 'false'],
       ['Medium', 'false'],
       ['Low', 'false'],
-      ['No priority', 'false'],
+      ['None', 'false'],
     ]);
     for (const button of group.querySelectorAll('button')) {
       expect(button.getAttribute('type')).toBe('button');
@@ -417,7 +417,7 @@ describe('priority filter', () => {
 
   it('#34 AC1: the filter is shown in the Completed view too', () => {
     render(root, { tasks, validationMessage: null, view: 'completed' });
-    expect(pressed().map(([text]) => text)).toEqual(['All', 'High', 'Medium', 'Low', 'No priority']);
+    expect(pressed().map(([text]) => text)).toEqual(['All', 'High', 'Medium', 'Low', 'None']);
   });
 
   it('#34 AC2: lists only the tasks of the view that match the chosen filter', () => {
