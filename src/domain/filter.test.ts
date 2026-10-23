@@ -92,8 +92,8 @@ describe('tasksForPriority', () => {
     ];
     expect(ids(sortTasks(tasksForPriority(created, 'high')))).toEqual([
       'sooner',
-      'later',
       'same-day',
+      'later',
       'undated',
     ]);
   });
