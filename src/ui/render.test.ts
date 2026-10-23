@@ -374,3 +374,104 @@ describe('render overdue label', () => {
     expect(rows[0].querySelector('.task-due')!.textContent).toMatch(/^Due /);
   });
 });
+
+describe('priority filter', () => {
+  const task = (id: string, priority: 'low' | 'medium' | 'high' | null, completed = false, dueDate: string | null = null) => ({
+    id,
+    title: id,
+    dueDate,
+    priority,
+    completed,
+    createdAt: '',
+  });
+  const tasks = [
+    task('high', 'high'),
+    task('medium', 'medium'),
+    task('low', 'low'),
+    task('none', null),
+    task('done-high', 'high', true),
+  ];
+  const titles = () => [...root.querySelectorAll('#task-list .task-title')].map((t) => t.textContent);
+  const pressed = () =>
+    [...root.querySelectorAll('#task-priority-filter button')].map((b) => [
+      b.textContent,
+      b.getAttribute('aria-pressed'),
+    ]);
+
+  it('#34 AC1: shows a labelled group of five buttons in order, with "All" pressed', () => {
+    render(root, { tasks, validationMessage: null });
+    const group = root.querySelector('#task-priority-filter')!;
+    expect(group.getAttribute('role')).toBe('group');
+    expect(group.getAttribute('aria-label')).toBe('Filter by priority');
+    expect(pressed()).toEqual([
+      ['All', 'true'],
+      ['High', 'false'],
+      ['Medium', 'false'],
+      ['Low', 'false'],
+      ['No priority', 'false'],
+    ]);
+    for (const button of group.querySelectorAll('button')) {
+      expect(button.getAttribute('type')).toBe('button');
+    }
+  });
+
+  it('#34 AC1: the filter is shown in the Completed view too', () => {
+    render(root, { tasks, validationMessage: null, view: 'completed' });
+    expect(pressed().map(([text]) => text)).toEqual(['All', 'High', 'Medium', 'Low', 'No priority']);
+  });
+
+  it('#34 AC2: lists only the tasks of the view that match the chosen filter', () => {
+    render(root, { tasks, validationMessage: null, priorityFilter: 'high' });
+    expect(titles()).toEqual(['high']);
+    expect(pressed().find(([, value]) => value === 'true')).toEqual(['High', 'true']);
+    render(root, { tasks, validationMessage: null, priorityFilter: 'none' });
+    expect(titles()).toEqual(['none']);
+    render(root, { tasks, validationMessage: null, priorityFilter: 'high', view: 'completed' });
+    expect(titles()).toEqual(['done-high']);
+    render(root, { tasks, validationMessage: null, priorityFilter: 'all' });
+    expect(titles()).toEqual(['high', 'medium', 'low', 'none']);
+  });
+
+  it('#34 AC3: matching tasks are listed in the REQ-012 order', () => {
+    const dated = [
+      task('undated', 'high'),
+      task('later', 'high', false, '2026-11-02'),
+      task('other', 'low', false, '2026-10-01'),
+      task('sooner', 'high', false, '2026-10-30'),
+    ];
+    render(root, { tasks: dated, validationMessage: null, priorityFilter: 'high' });
+    expect(titles()).toEqual(['sooner', 'later', 'undated']);
+  });
+
+  it('#34 AC5: with "All" chosen, each view lists exactly what it listed without a filter', () => {
+    for (const view of ['active', 'completed'] as const) {
+      render(root, { tasks, validationMessage: null, view });
+      const without = titles();
+      render(root, { tasks, validationMessage: null, view, priorityFilter: 'all' });
+      expect(titles()).toEqual(without);
+    }
+  });
+
+  it('#34 AC2 AC4: clicking a filter button filters the list, and switching views keeps it', () => {
+    let n = 0;
+    const controller = createController({
+      tasks,
+      storage: { setItem: () => {} },
+      render: (state) => render(root, state),
+      now: () => new Date('2026-09-25T08:00:00.000Z'),
+      newId: () => `id-${++n}`,
+    });
+    render(root, controller.state());
+    bindEvents(root, controller);
+    const { views, priorityFilters } = ensureLayout(root);
+    priorityFilters.high.click();
+    expect(titles()).toEqual(['high']);
+    views.completed.click();
+    expect(titles()).toEqual(['done-high']);
+    expect(pressed().find(([, value]) => value === 'true')).toEqual(['High', 'true']);
+    views.active.click();
+    expect(titles()).toEqual(['high']);
+    priorityFilters.all.click();
+    expect(titles()).toEqual(['high', 'medium', 'low', 'none']);
+  });
+});

@@ -31,6 +31,7 @@ describe('controller.addTask', () => {
       tasks: [],
       validationMessage: TITLE_REQUIRED,
       view: 'active',
+      priorityFilter: 'all',
       today: '2026-09-25',
     });
     expect(render).toHaveBeenCalledTimes(1);
@@ -93,6 +94,7 @@ describe('controller persistence', () => {
       tasks: [],
       validationMessage: null,
       view: 'active',
+      priorityFilter: 'all',
       today: '2026-09-25',
     });
   });
@@ -166,6 +168,22 @@ describe('controller views and completion', () => {
     controller.setView('completed');
     expect(controller.state().view).toBe('completed');
     expect(render).toHaveBeenLastCalledWith(controller.state());
+  });
+
+  it('#34 AC1: the app opens with the "all" priority filter', () => {
+    const { controller } = setup();
+    expect(controller.state().priorityFilter).toBe('all');
+  });
+
+  it('#34 AC4: setPriorityFilter sets the filter and renders, and switching views keeps it', () => {
+    const { controller, render } = setup();
+    controller.setPriorityFilter('high');
+    expect(controller.state().priorityFilter).toBe('high');
+    expect(render).toHaveBeenLastCalledWith(controller.state());
+    controller.setView('completed');
+    expect(controller.state()).toMatchObject({ view: 'completed', priorityFilter: 'high' });
+    controller.setView('active');
+    expect(controller.state()).toMatchObject({ view: 'active', priorityFilter: 'high' });
   });
 
   it('#8: adding a task while Completed is shown switches to Active', () => {
