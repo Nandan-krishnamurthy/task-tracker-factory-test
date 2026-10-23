@@ -162,7 +162,7 @@ function labelFor(id: string, text: string): HTMLLabelElement {
 const PRIORITY_FILTER_NAMES: Record<PriorityFilter, string> = {
   all: 'All',
   ...PRIORITY_NAMES,
-  none: 'No priority',
+  none: 'None',
 };
 
 function priorityFilterButton(filter: PriorityFilter): HTMLButtonElement {
