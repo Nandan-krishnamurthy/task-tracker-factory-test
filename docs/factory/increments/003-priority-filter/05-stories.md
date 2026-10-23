@@ -18,7 +18,7 @@ As an individual user, I want to list only the tasks of one priority in the curr
 - AC5: Given the existing tests, when the test command runs, then every existing unit and end-to-end test still passes, and with "All" chosen both views list exactly the tasks they listed before this change, in the same order.
 #### Out of scope
 - Keeping the filter right after a task's priority is edited or a task is added, and the accessibility and speed checks of the filter (STORY-016).
-- Remembering the filter across reloads (open question in `02-requirements.md`).
+- Remembering the filter across reloads (STORY-017).
 - Any change to the stored format `task-tracker:v1`, to `View` or to the sort order.
 #### Technical notes
 - `domain/filter.ts`: add `PriorityFilter = 'all' | Priority | 'none'`, `PRIORITY_FILTERS` (`['all', 'high', 'medium', 'low', 'none']`) and the pure `tasksForPriority(tasks, filter)`, which keeps the input order and never mutates it. `View` and `tasksForView` stay unchanged.
@@ -46,7 +46,7 @@ As a user who relies on the keyboard or a screen reader, and who changes tasks o
 - AC5: Given 500 tasks are stored, when the user chooses a filter, then the list shows the result within 100 ms of the user's action.
 #### Out of scope
 - The filter controls and the matching rule themselves (STORY-015).
-- Remembering the filter across reloads.
+- Remembering the filter across reloads (STORY-017).
 #### Technical notes
 - `app/controller.ts`: a successful `addTask` sets `priorityFilter: 'all'` next to `view: 'active'`; a rejected one leaves both as they are.
 - Every other action already re-renders with the current filter, so AC1 should need no new code beyond tests; fix any gap the tests find.
@@ -56,3 +56,30 @@ As a user who relies on the keyboard or a screen reader, and who changes tasks o
 #### Test plan
 - Unit: the controller resets the filter on a successful add and keeps it on a rejected one (AC2); after an edit or a toggle, the rendered rows match the filter (AC1).
 - End-to-end: edit, clear and complete tasks with "High" chosen (AC1); add a task with "Low" chosen, and try an empty title (AC2); keyboard-only use and `aria-pressed` (AC3); axe scans for each choice in both views (AC4); the 500-task latency measurement for a filter change (AC5).
+
+## M3: Remember the filter
+
+### STORY-017: Remember the priority filter across reloads
+- Traces to: REQ-027, REQ-035, REQ-036
+- Blocked by: STORY-015
+- Milestone: M3
+#### Story
+As a user who always works on one priority, I want the app to remember my priority filter so that I do not have to choose it again every time I open the app.
+#### Acceptance criteria
+- AC1: Given the user has chosen "High", when the page is reloaded, then "High" is the pressed choice and the view lists only its High-priority tasks.
+- AC2: Given the user has chosen "Low", when the app is opened in a new page of the same browser, then "Low" is the pressed choice.
+- AC3: Given nothing has been remembered yet, when the app opens, then "All" is the pressed choice and every task of the view is listed.
+- AC4: Given the remembered filter value is not one of the five choices, when the app opens, then "All" is the pressed choice, no error is shown, and the stored tasks are loaded and listed exactly as without it.
+- AC5: Given tasks are stored, when the user chooses filters and reloads, then the stored task data under `task-tracker:v1` is unchanged, and every existing persistence and storage-failure test still passes.
+#### Out of scope
+- The filter controls and the matching rule (STORY-015), and resetting to "All" when a task is added (STORY-016).
+- Remembering the view (Active or Completed): the app still opens on Active.
+- A warning when remembering the filter fails (architecture decision 8).
+#### Technical notes
+- New `src/storage/filterStore.ts`: `FILTER_KEY = 'task-tracker:priority-filter'`, `loadPriorityFilter(storage)` (a valid stored value, else `'all'`; never throws) and `savePriorityFilter(storage, filter)` (returns whether the write worked; never throws). It never reads or writes `task-tracker:v1`.
+- `app/controller.ts`: `ControllerDeps` gains `priorityFilter?: PriorityFilter`; the first state uses it (`'all'` when absent); `update()` saves the filter only when it changed, and ignores a failed save.
+- `main.ts`: passes `priorityFilter: loadPriorityFilter(localStorage)` to `createController`.
+- No new dependencies.
+#### Test plan
+- Unit (`src/storage/filterStore.test.ts`): `loadPriorityFilter` for each of the five values, a missing value, an unknown value and a `getItem` that throws (AC3, AC4); `savePriorityFilter` with a working and a throwing `setItem`. Controller: starts from the remembered choice, saves when the filter changes, and does not save when it does not (AC1, AC5).
+- End-to-end: choose "High" and reload (AC1); choose "Low" and open a new page in the same browser context (AC2); a first visit (AC3); an unknown value under `task-tracker:priority-filter` (AC4); the `task-tracker:v1` value before and after choosing filters and reloading (AC5).

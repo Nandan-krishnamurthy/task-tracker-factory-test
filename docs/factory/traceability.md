@@ -34,7 +34,7 @@ Status is one of: `Not started`, `In progress`, `Implemented`, `Deferred`.
 | REQ-024 | STORY-013 (#27) | #29 | `#27 AC3: completing removes the label, and reopening shows it again`; `#27 AC3: a completed task is never overdue`; `#27 AC3: a completed task in the Completed view shows no label` | Implemented |
 | REQ-025 | STORY-013 (#27) | #29 | `#27 AC4: editing the due date shows or removes the label at once`; `#27 AC4: every rendered state reads the clock again` | Implemented |
 | REQ-026 | STORY-014 (#28) | #30 | `#28 AC1: the Overdue label has its own style with AA contrast`; `#28 AC2: axe reports no violations with an overdue task in the Active view`; `#28 AC3: axe reports no violations with a past-dated task in the Completed view`; `#28 AC4: the overdue row is read with its title and "Overdue"` | Implemented |
-| REQ-027 | STORY-015 | — | — | Not started |
+| REQ-027 | STORY-015, STORY-017 | — | — | Not started |
 | REQ-028 | STORY-015 | — | — | Not started |
 | REQ-029 | STORY-015 | — | — | Not started |
 | REQ-030 | STORY-015 | — | — | Not started |
@@ -42,3 +42,5 @@ Status is one of: `Not started`, `In progress`, `Implemented`, `Deferred`.
 | REQ-032 | STORY-016 | — | — | Not started |
 | REQ-033 | STORY-016 | — | — | Not started |
 | REQ-034 | STORY-016 | — | — | Not started |
+| REQ-035 | STORY-017 | — | — | Not started |
+| REQ-036 | STORY-017 | — | — | Not started |

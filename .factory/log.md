@@ -77,3 +77,4 @@
 2026-10-23T11:43:36Z S03 003-priority-filter architecture
 2026-10-23T11:44:49Z S04 003-priority-filter plan
 2026-10-23T11:46:45Z S05 003-priority-filter stories STORY-015..STORY-016
+2026-10-23T11:58:07Z S05 003-priority-filter revision
