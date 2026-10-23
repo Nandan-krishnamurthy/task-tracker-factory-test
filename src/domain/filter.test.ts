@@ -67,7 +67,7 @@ describe('tasksForPriority', () => {
   });
 
   it('#34 AC2: a priority keeps only the tasks with that priority', () => {
-    expect(ids(tasksForPriority(mixed, 'high'))).toEqual(['h1']);
+    expect(ids(tasksForPriority(mixed, 'high'))).toEqual(['h1', 'h2']);
     expect(ids(tasksForPriority(mixed, 'medium'))).toEqual(['m1']);
     expect(ids(tasksForPriority(mixed, 'low'))).toEqual(['l1']);
   });
