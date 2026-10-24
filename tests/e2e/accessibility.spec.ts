@@ -235,3 +235,65 @@ test.describe('overdue label', () => {
     expect(snapshot).toContain('Overdue');
   });
 });
+
+const FILTER_CHOICES = ['All', 'High', 'Medium', 'Low', 'None'];
+const priorityFilter = (page: Page, name: string) =>
+  page.getByRole('group', { name: 'Filter by priority' }).getByRole('button', { name, exact: true });
+
+async function addWithPriority(page: Page, name: string, level: string) {
+  await page.getByLabel('Priority', { exact: true }).selectOption(level);
+  await addTask(page, name);
+}
+
+async function expectOnlyPressed(page: Page, name: string) {
+  for (const choice of FILTER_CHOICES) {
+    await expect(priorityFilter(page, choice)).toHaveAttribute('aria-pressed', String(choice === name));
+  }
+}
+
+test('#35 AC3: the filter buttons are named by their labels and work with the keyboard alone', async ({
+  page,
+}) => {
+  await addWithPriority(page, 'Buy milk', 'high');
+  await addTask(page, 'Walk dog');
+  for (const name of FILTER_CHOICES) {
+    await expect(priorityFilter(page, name)).toHaveAccessibleName(name);
+  }
+  await expectOnlyPressed(page, 'All');
+  const expected: Record<string, string[]> = {
+    High: ['Buy milk'],
+    Medium: [],
+    Low: [],
+    None: ['Walk dog'],
+    All: ['Buy milk', 'Walk dog'],
+  };
+  // Forward with Tab through High to None, then back to All with Shift+Tab; Enter and Space alternate.
+  const steps = [
+    ['High', 'Tab', 'Enter'],
+    ['Medium', 'Tab', 'Space'],
+    ['Low', 'Tab', 'Enter'],
+    ['None', 'Tab', 'Space'],
+    ['All', 'Shift+Tab', 'Enter'],
+  ] as const;
+  for (const [name, direction, key] of steps) {
+    await tabTo(page, priorityFilter(page, name), direction);
+    await page.keyboard.press(key);
+    await expectOnlyPressed(page, name);
+    await expect(titles(page)).toHaveText(expected[name]);
+  }
+});
+
+test('#35 AC4: axe reports no violations for each filter choice in both views', async ({ page }) => {
+  await addWithPriority(page, 'Buy milk', 'high');
+  await addWithPriority(page, 'Walk dog', 'low');
+  await addTask(page, 'Call mum');
+  await page.getByRole('checkbox', { name: 'Done: Walk dog' }).click();
+  for (const name of ['Active', 'Completed'] as const) {
+    await view(page, name).click();
+    for (const choice of FILTER_CHOICES) {
+      await priorityFilter(page, choice).click();
+      await expectOnlyPressed(page, choice);
+      await expectNoViolations(page);
+    }
+  }
+});

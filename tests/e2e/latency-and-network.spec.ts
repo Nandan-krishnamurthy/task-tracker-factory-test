@@ -63,6 +63,24 @@ async function timeInPage(page: Page, step: string, index: number): Promise<numb
           act: () => root.querySelector<HTMLButtonElement>(`.task-delete[data-id="${id}"]`)!.click(),
           done: () => rowOf(id) === null,
         },
+        // Each run chooses a different filter: High, Medium, Low, None, then All. A seeded
+        // task's priority follows its number, as in seed(), so the listed rows can be checked.
+        filter: {
+          act: () => {
+            const choice = ['high', 'medium', 'low', 'none', 'all'][(index / 7) % 5];
+            document.querySelector<HTMLButtonElement>(`[data-priority-filter="${choice}"]`)!.click();
+          },
+          done: () => {
+            const choice = ['high', 'medium', 'low', 'none', 'all'][(index / 7) % 5];
+            const priorityOf = (n: number) => ['low', 'medium', 'high', 'none'][n % 4];
+            const shown = [...root.querySelectorAll<HTMLElement>('.task-done')].map((box) =>
+              Number(box.dataset.id!.slice('seed-'.length)),
+            );
+            return choice === 'all'
+              ? shown.length === 500
+              : shown.length === 125 && shown.every((n) => priorityOf(n) === choice);
+          },
+        },
       };
       const { act, done } = steps[step];
       return new Promise<number>((resolve) => {
@@ -197,4 +215,12 @@ test('#13 AC3: a full journey makes no requests beyond the page’s own files on
       expect(['document', 'script', 'stylesheet', 'image', 'font'], `${name}: ${r.url}`).toContain(r.type);
     }
   }
+});
+
+test('#35 AC5: with 500 tasks stored, a filter change is shown within 100 ms', async ({ page }) => {
+  await seed(page, false);
+  await expect(titles(page)).toHaveCount(SEEDED);
+  await expectFast(page, 'filter');
+  // The last run chose "All" again.
+  await expect(titles(page)).toHaveCount(SEEDED);
 });

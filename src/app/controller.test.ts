@@ -321,3 +321,30 @@ describe('controller today', () => {
     expect(render).toHaveBeenLastCalledWith(expect.objectContaining({ today: '2026-10-08' }));
   });
 });
+
+describe('controller priority filter as tasks change', () => {
+  it('#35 AC2: a successful add resets the filter to "all", and a rejected add keeps it', () => {
+    const { controller, render } = setup();
+    controller.setPriorityFilter('low');
+    expect(controller.addTask('  ')).toBe(false);
+    expect(controller.state()).toMatchObject({ priorityFilter: 'low', validationMessage: TITLE_REQUIRED });
+    expect(controller.addTask('Buy milk')).toBe(true);
+    expect(controller.state()).toMatchObject({ priorityFilter: 'all', view: 'active' });
+    expect(render).toHaveBeenLastCalledWith(controller.state());
+  });
+
+  it('#35 AC1: changing or clearing a priority and completing a task keep the chosen filter', () => {
+    const { controller } = setup();
+    controller.addTask('Ship release', { priority: 'high' });
+    const [{ id }] = controller.state().tasks;
+    controller.setPriorityFilter('high');
+    controller.editTask(id, 'Ship release', { priority: 'low' });
+    expect(controller.state()).toMatchObject({ priorityFilter: 'high' });
+    expect(controller.state().tasks[0].priority).toBe('low');
+    controller.editTask(id, 'Ship release', { priority: '' });
+    expect(controller.state()).toMatchObject({ priorityFilter: 'high' });
+    expect(controller.state().tasks[0].priority).toBeNull();
+    controller.toggleTask(id, true);
+    expect(controller.state()).toMatchObject({ priorityFilter: 'high' });
+  });
+});
