@@ -38,9 +38,9 @@ Status is one of: `Not started`, `In progress`, `Implemented`, `Deferred`.
 | REQ-028 | STORY-015 (#34) | #37 | `#34 AC2: "all" keeps every task, in order, without mutating the list`; `#34 AC2: a priority keeps only the tasks with that priority`; `#34 AC2: "No priority" keeps only the tasks without a priority`; `#34 AC2: within a view, only that view's matching tasks are kept`; `#34 AC2: lists only the tasks of the view that match the chosen filter`; `#34 AC2 AC4: clicking a filter button filters the list, and switching views keeps it`; `#34 AC2: each choice lists only the matching tasks of the view` | Implemented |
 | REQ-029 | STORY-015 (#34) | #37 | `#34 AC3: matching tasks keep the REQ-012 order: soonest due first, undated last, ties by creation`; `#34 AC3: matching tasks are listed in the REQ-012 order`; `#34 AC3: matching tasks keep the due-date order, undated last` | Implemented |
 | REQ-030 | STORY-015 (#34) | #37 | `#34 AC4: setPriorityFilter sets the filter and renders, and switching views keeps it`; `#34 AC2 AC4: clicking a filter button filters the list, and switching views keeps it`; `#34 AC4: the chosen filter stays chosen when switching views` | Implemented |
-| REQ-031 | STORY-016 | — | — | Not started |
-| REQ-032 | STORY-016 | — | — | Not started |
-| REQ-033 | STORY-016 | — | — | Not started |
-| REQ-034 | STORY-016 | — | — | Not started |
+| REQ-031 | STORY-016 (#35) | #38 | `#35 AC1: changing or clearing a priority and completing a task keep the chosen filter`; `#35 AC1: with "High" chosen, the rows follow priority edits and completion at once`; `#35 AC1: with "High" chosen, changing, clearing and completing tasks update the list at once` | Implemented |
+| REQ-032 | STORY-016 (#35) | #38 | `#35 AC2: a successful add resets the filter to "all", and a rejected add keeps it`; `#35 AC2: adding a task with "Low" chosen presses "All"; an empty title keeps "Low"`; `#35 AC2: adding a task chooses "All", and a rejected add keeps the chosen filter` | Implemented |
+| REQ-033 | STORY-016 (#35) | #38 | `#35 AC3: the filter buttons are named by their labels and work with the keyboard alone`; `#35 AC4: axe reports no violations for each filter choice in both views` | Implemented |
+| REQ-034 | STORY-016 (#35) | #38 | `#35 AC5: with 500 tasks stored, a filter change is shown within 100 ms` | Implemented |
 | REQ-035 | STORY-017 | — | — | Not started |
 | REQ-036 | STORY-017 | — | — | Not started |

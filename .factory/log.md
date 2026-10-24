@@ -90,3 +90,4 @@
 2026-10-24T09:19:10Z S07 003-priority-filter #35 branch story/35-keep-priority-filter-right
 2026-10-24T09:20:48Z S08 003-priority-filter #35 implement
 2026-10-24T09:24:29Z S09 003-priority-filter #35 verify run
+2026-10-24T09:31:48Z S11 003-priority-filter #35 PR #38
