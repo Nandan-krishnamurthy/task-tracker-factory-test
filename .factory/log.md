@@ -88,3 +88,4 @@
 2026-10-23T15:48:56Z S08 003-priority-filter #34 rework round 1
 2026-10-23T15:49:50Z S09 003-priority-filter #34 verify run
 2026-10-24T09:19:10Z S07 003-priority-filter #35 branch story/35-keep-priority-filter-right
+2026-10-24T09:20:48Z S08 003-priority-filter #35 implement
