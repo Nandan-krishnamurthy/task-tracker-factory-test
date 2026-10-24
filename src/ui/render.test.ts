@@ -475,3 +475,65 @@ describe('priority filter', () => {
     expect(titles()).toEqual(['high', 'medium', 'low', 'none']);
   });
 });
+
+describe('priority filter as tasks change', () => {
+  const titles = () => [...root.querySelectorAll('#task-list .task-title')].map((t) => t.textContent);
+  const pressed = () =>
+    [...root.querySelectorAll('#task-priority-filter button[aria-pressed="true"]')].map((b) => b.textContent);
+
+  function app() {
+    let n = 0;
+    const controller = createController({
+      tasks: [],
+      storage: { setItem: () => {} },
+      render: (state) => render(root, state),
+      now: () => new Date('2026-09-25T08:00:00.000Z'),
+      newId: () => `id-${++n}`,
+    });
+    render(root, controller.state());
+    bindEvents(root, controller);
+    const idOf = (title: string) => controller.state().tasks.find((t) => t.title === title)!.id;
+    return { controller, idOf };
+  }
+
+  it('#35 AC1: with "High" chosen, the rows follow priority edits and completion at once', () => {
+    const { controller, idOf } = app();
+    controller.addTask('Ship release', { priority: 'high' });
+    controller.addTask('Review notes', { priority: 'high' });
+    controller.addTask('Water plants', { priority: 'low' });
+    ensureLayout(root).priorityFilters.high.click();
+    expect(titles()).toEqual(['Ship release', 'Review notes']);
+    // Changed to Low: it leaves the list in the same action.
+    controller.editTask(idOf('Ship release'), 'Ship release', { priority: 'low' });
+    expect(titles()).toEqual(['Review notes']);
+    // A Low task changed to High: it appears.
+    controller.editTask(idOf('Water plants'), 'Water plants', { priority: 'high' });
+    expect(titles()).toEqual(['Review notes', 'Water plants']);
+    // Priority cleared: it leaves the list.
+    controller.editTask(idOf('Review notes'), 'Review notes', { priority: '' });
+    expect(titles()).toEqual(['Water plants']);
+    // Completed: it leaves Active, and is listed in Completed with "High" still chosen.
+    controller.toggleTask(idOf('Water plants'), true);
+    expect(titles()).toEqual([]);
+    ensureLayout(root).views.completed.click();
+    expect(pressed()).toEqual(['High']);
+    expect(titles()).toEqual(['Water plants']);
+  });
+
+  it('#35 AC2: adding a task with "Low" chosen presses "All"; an empty title keeps "Low"', () => {
+    const { controller } = app();
+    controller.addTask('Water plants', { priority: 'low' });
+    controller.addTask('Ship release', { priority: 'high' });
+    const { form, input, priorityFilters } = ensureLayout(root);
+    priorityFilters.low.click();
+    expect(titles()).toEqual(['Water plants']);
+    input.value = '';
+    form.requestSubmit();
+    expect(pressed()).toEqual(['Low']);
+    expect(titles()).toEqual(['Water plants']);
+    input.value = 'Call mum';
+    form.requestSubmit();
+    expect(pressed()).toEqual(['All']);
+    expect(titles()).toEqual(['Water plants', 'Ship release', 'Call mum']);
+  });
+});

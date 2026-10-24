@@ -86,8 +86,14 @@ export function createController({ tasks, storage, render, now, newId }: Control
         update({ ...current, validationMessage: result.error });
         return false;
       }
-      // Switch to Active, so the new task is visible.
-      update({ ...current, tasks: result.tasks, validationMessage: null, view: 'active' });
+      // Switch to Active and every priority, so the new task is visible (REQ-032).
+      update({
+        ...current,
+        tasks: result.tasks,
+        validationMessage: null,
+        view: 'active',
+        priorityFilter: 'all',
+      });
       return true;
     },
     toggleTask(id, completed) {

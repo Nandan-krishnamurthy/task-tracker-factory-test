@@ -98,3 +98,53 @@ test('#34 AC5: with All chosen, both views list what they listed before, in the 
   await view(page, 'Completed').click();
   await expect(titles(page)).toHaveText(['Finished']);
 });
+
+async function editPriority(page: Page, name: string, level: string) {
+  await list(page).getByRole('button', { name: `Edit ${name}`, exact: true }).click();
+  await list(page).getByLabel('New priority').selectOption(level);
+  await list(page).getByRole('button', { name: 'Save' }).click();
+  await expect(list(page).getByLabel('New priority')).toHaveCount(0);
+}
+
+test('#35 AC1: with "High" chosen, changing, clearing and completing tasks update the list at once', async ({
+  page,
+}) => {
+  await addTask(page, 'Ship release', 'high');
+  await addTask(page, 'Review notes', 'high');
+  await addTask(page, 'Fix bug', 'high');
+  await addTask(page, 'Water plants', 'low');
+  await filter(page, 'High').click();
+  await expect(titles(page)).toHaveText(['Ship release', 'Review notes', 'Fix bug']);
+  await editPriority(page, 'Ship release', 'low');
+  await expect(titles(page)).toHaveText(['Review notes', 'Fix bug']);
+  await editPriority(page, 'Review notes', '');
+  await expect(titles(page)).toHaveText(['Fix bug']);
+  await doneBox(page, 'Fix bug').click();
+  await expect(titles(page)).toHaveCount(0);
+  await view(page, 'Completed').click();
+  await expectPressed(page, 'High');
+  await expect(titles(page)).toHaveText(['Fix bug']);
+  // A Low task changed to High leaves "Low" and is listed under "High".
+  await view(page, 'Active').click();
+  await filter(page, 'Low').click();
+  await expect(titles(page)).toHaveText(['Ship release', 'Water plants']);
+  await editPriority(page, 'Water plants', 'high');
+  await expect(titles(page)).toHaveText(['Ship release']);
+  await filter(page, 'High').click();
+  await expect(titles(page)).toHaveText(['Water plants']);
+});
+
+test('#35 AC2: adding a task chooses "All", and a rejected add keeps the chosen filter', async ({ page }) => {
+  await addTask(page, 'Water plants', 'low');
+  await addTask(page, 'Ship release', 'high');
+  await filter(page, 'Low').click();
+  await expect(titles(page)).toHaveText(['Water plants']);
+  await title(page).fill('');
+  await title(page).press('Enter');
+  await expect(page.locator('#task-title-message')).toHaveText('A title is required.');
+  await expectPressed(page, 'Low');
+  await expect(titles(page)).toHaveText(['Water plants']);
+  await addTask(page, 'Call mum');
+  await expectPressed(page, 'All');
+  await expect(titles(page)).toHaveText(['Water plants', 'Ship release', 'Call mum']);
+});
