@@ -1,6 +1,7 @@
 import { createController } from './app/controller';
 import { newId } from './app/ids';
 import { APP_TITLE } from './app/title';
+import { loadPriorityFilter } from './storage/filterStore';
 import { loadTasks } from './storage/taskStore';
 import { bindEvents } from './ui/events';
 import { render } from './ui/render';
@@ -20,6 +21,7 @@ root.replaceChildren(header, main);
 
 const controller = createController({
   tasks: loadTasks(localStorage).tasks,
+  priorityFilter: loadPriorityFilter(localStorage),
   storage: localStorage,
   render: (state) => render(main, state),
   now: () => new Date(),

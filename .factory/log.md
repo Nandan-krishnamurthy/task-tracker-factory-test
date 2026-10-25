@@ -91,3 +91,7 @@
 2026-10-24T09:20:48Z S08 003-priority-filter #35 implement
 2026-10-24T09:24:29Z S09 003-priority-filter #35 verify run
 2026-10-24T09:31:48Z S11 003-priority-filter #35 PR #38
+2026-10-25T06:59:39Z S07 003-priority-filter #36 branch story/36-remember-priority-filter
+2026-10-25T07:01:48Z S08 003-priority-filter #36 implement
+2026-10-25T07:03:45Z S09 003-priority-filter #36 verify run
+2026-10-25T07:11:33Z S11 003-priority-filter #36 PR #39

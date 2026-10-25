@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TITLE_REQUIRED } from '../domain/task';
+import { FILTER_KEY, loadPriorityFilter } from '../storage/filterStore';
 import { loadTasks, STORAGE_KEY } from '../storage/taskStore';
 import { createController, SAVE_WARNING, type AppState } from './controller';
 
@@ -346,5 +347,91 @@ describe('controller priority filter as tasks change', () => {
     expect(controller.state().tasks[0].priority).toBeNull();
     controller.toggleTask(id, true);
     expect(controller.state()).toMatchObject({ priorityFilter: 'high' });
+  });
+});
+
+describe('controller remembering the priority filter', () => {
+  function remembering(initial: Record<string, string> = {}) {
+    const items = new Map(Object.entries(initial));
+    const writes: string[] = [];
+    const storage = {
+      getItem: (key: string) => items.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        writes.push(key);
+        items.set(key, value);
+      },
+    };
+    let n = 0;
+    const controller = createController({
+      tasks: loadTasks(storage).tasks,
+      priorityFilter: loadPriorityFilter(storage),
+      storage,
+      render: () => {},
+      now: () => new Date('2026-09-25T08:00:00.000Z'),
+      newId: () => `id-${++n}`,
+    });
+    return { controller, items, writes };
+  }
+
+  it('#36 AC1: a new controller starts from the remembered choice', () => {
+    const first = remembering();
+    first.controller.setPriorityFilter('high');
+    expect(first.items.get(FILTER_KEY)).toBe('high');
+    const second = remembering(Object.fromEntries(first.items));
+    expect(second.controller.state().priorityFilter).toBe('high');
+  });
+
+  it('#36 AC3: with nothing remembered, the controller starts on "all"', () => {
+    expect(remembering().controller.state().priorityFilter).toBe('all');
+  });
+
+  it('#36 AC4: an unknown remembered value starts on "all", with the stored tasks as without it', () => {
+    const first = remembering();
+    first.controller.addTask('Buy milk');
+    const tasks = first.items.get(STORAGE_KEY)!;
+    const plain = remembering({ [STORAGE_KEY]: tasks });
+    const bad = remembering({ [STORAGE_KEY]: tasks, [FILTER_KEY]: 'urgent' });
+    expect(bad.controller.state()).toEqual(plain.controller.state());
+    expect(bad.controller.state()).toMatchObject({ priorityFilter: 'all', validationMessage: null });
+    expect(bad.controller.state().storageWarning).toBeUndefined();
+  });
+
+  it('#36 AC5: saves the filter only when it changes, and never rewrites task-tracker:v1 for it', () => {
+    const { controller, items, writes } = remembering();
+    controller.addTask('Buy milk');
+    const tasks = items.get(STORAGE_KEY);
+    writes.length = 0;
+    controller.setPriorityFilter('low');
+    controller.setPriorityFilter('low');
+    controller.setView('completed');
+    controller.startEdit('id-1');
+    controller.cancelEdit();
+    expect(writes).toEqual([FILTER_KEY]);
+    expect(items.get(STORAGE_KEY)).toBe(tasks);
+    expect(items.get(FILTER_KEY)).toBe('low');
+  });
+
+  it('#36 AC5: adding a task remembers "all" along with saving the tasks', () => {
+    const { controller, items, writes } = remembering({ [FILTER_KEY]: 'low' });
+    controller.addTask('Buy milk');
+    expect(writes.sort()).toEqual([FILTER_KEY, STORAGE_KEY].sort());
+    expect(items.get(FILTER_KEY)).toBe('all');
+  });
+
+  it('#36 AC5: a failed filter save is ignored: the filter applies and no warning is shown', () => {
+    const controller = createController({
+      tasks: [],
+      storage: {
+        setItem: (key: string) => {
+          if (key === FILTER_KEY) throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+        },
+      },
+      render: () => {},
+      now: () => new Date('2026-09-25T08:00:00.000Z'),
+      newId: () => 'id-1',
+    });
+    controller.setPriorityFilter('high');
+    expect(controller.state().priorityFilter).toBe('high');
+    expect(controller.state().storageWarning).toBeUndefined();
   });
 });

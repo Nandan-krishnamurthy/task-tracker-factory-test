@@ -9,6 +9,7 @@ import {
   type Task,
   type TaskPatch,
 } from '../domain/task';
+import { savePriorityFilter } from '../storage/filterStore';
 import { saveTasks } from '../storage/taskStore';
 
 export interface AppState {
@@ -31,6 +32,8 @@ export const SAVE_WARNING = 'Your changes may not be saved: this browser could n
 export interface ControllerDeps {
   /** The tasks loaded at start, in creation order. */
   tasks: readonly Task[];
+  /** The priority filter remembered at start (REQ-035). Absent means "all". */
+  priorityFilter?: PriorityFilter;
   storage: Pick<Storage, 'setItem'>;
   render: (state: AppState) => void;
   now: () => Date;
@@ -57,13 +60,21 @@ export interface Controller {
   state(): AppState;
 }
 
-export function createController({ tasks, storage, render, now, newId }: ControllerDeps): Controller {
-  // The app always opens on Active with every priority (REQ-027); neither is stored.
+export function createController({
+  tasks,
+  priorityFilter = 'all',
+  storage,
+  render,
+  now,
+  newId,
+}: ControllerDeps): Controller {
+  // The app always opens on Active (the view is not stored), with the remembered
+  // priority filter, or every priority when none is remembered (REQ-027, REQ-035).
   let current: AppState = {
     tasks,
     validationMessage: null,
     view: 'active',
-    priorityFilter: 'all',
+    priorityFilter,
     today: localDate(now()),
   };
 
@@ -73,6 +84,12 @@ export function createController({ tasks, storage, render, now, newId }: Control
     if (next.tasks !== current.tasks) {
       const saved = saveTasks(storage, next.tasks);
       next = { ...next, storageWarning: saved.ok ? undefined : SAVE_WARNING };
+    }
+    // The filter is remembered only when it changed (REQ-035). A failed save is ignored:
+    // no data is lost, and the warning keeps meaning "your tasks" (decision 8).
+    const filter = next.priorityFilter ?? 'all';
+    if (filter !== (current.priorityFilter ?? 'all')) {
+      savePriorityFilter(storage, filter);
     }
     // Today is read on every update, so each action refreshes the overdue labels (REQ-025).
     current = { ...next, today: localDate(now()) };
