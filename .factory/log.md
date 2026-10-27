@@ -97,3 +97,4 @@
 2026-10-25T07:11:33Z S11 003-priority-filter #36 PR #39
 2026-10-27T10:29:30Z S00 004-edit-priority-due-today intake
 2026-10-27T10:34:58Z S01 004-edit-priority-due-today discovery baseline green null:lint
+2026-10-27T12:06:03Z S02 004-edit-priority-due-today requirements REQ-037..REQ-038
