@@ -2,8 +2,9 @@ import { expect, test, type Page } from '@playwright/test';
 
 const list = (page: Page) => page.getByRole('list', { name: 'Tasks' });
 const titles = (page: Page) => list(page).locator('.task-title');
+// `has` is matched inside each list item, so it starts from the title, not from the list.
 const row = (page: Page, name: string) =>
-  list(page).getByRole('listitem').filter({ has: titles(page).getByText(name, { exact: true }) });
+  list(page).getByRole('listitem').filter({ has: page.locator('.task-title').getByText(name, { exact: true }) });
 // By class, not by text: a task may itself be titled "Due today" (#27 AC2 in overdue.spec.ts).
 const dueToday = (page: Page, name: string) => row(page, name).locator('.task-due-today');
 const overdue = (page: Page, name: string) => row(page, name).locator('.task-overdue');
