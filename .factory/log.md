@@ -95,3 +95,11 @@
 2026-10-25T07:01:48Z S08 003-priority-filter #36 implement
 2026-10-25T07:03:45Z S09 003-priority-filter #36 verify run
 2026-10-25T07:11:33Z S11 003-priority-filter #36 PR #39
+2026-10-27T10:29:30Z S00 004-edit-priority-due-today intake
+2026-10-27T10:34:58Z S01 004-edit-priority-due-today discovery baseline green null:lint
+2026-10-27T12:06:03Z S02 004-edit-priority-due-today requirements REQ-037..REQ-038
+2026-10-27T12:07:57Z S03 004-edit-priority-due-today architecture
+2026-10-27T12:09:34Z S04 004-edit-priority-due-today plan
+2026-10-27T12:17:21Z S05 004-edit-priority-due-today stories STORY-018..STORY-018
+2026-10-27T13:06:42Z S05 004-edit-priority-due-today revision
+2026-10-27T13:33:15Z S05 004-edit-priority-due-today revision
