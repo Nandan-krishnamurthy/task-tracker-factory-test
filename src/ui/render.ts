@@ -7,7 +7,7 @@ import {
   type View,
 } from '../domain/filter';
 import { sortTasks } from '../domain/sort';
-import { isOverdue, type Priority, type Task } from '../domain/task';
+import { isDueToday, isOverdue, type Priority, type Task } from '../domain/task';
 
 export interface Layout {
   form: HTMLFormElement;
@@ -207,6 +207,13 @@ function taskItem(task: Task, today: string | undefined): HTMLLIElement {
     overdue.className = 'task-overdue';
     overdue.textContent = 'Overdue';
     item.append(' ', overdue);
+  }
+  // The same place and pattern for an open task due today (REQ-037, REQ-038).
+  if (today && isDueToday(task, today)) {
+    const dueToday = document.createElement('span');
+    dueToday.className = 'task-due-today';
+    dueToday.textContent = 'Due today';
+    item.append(' ', dueToday);
   }
   if (task.priority) {
     const priority = document.createElement('span');
