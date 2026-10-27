@@ -46,3 +46,5 @@ Status is one of: `Not started`, `In progress`, `Implemented`, `Deferred`.
 | REQ-036 | STORY-017 (#36) | #39 | `#36 AC3: with nothing remembered, it gives "all"`; `#36 AC4: a read that throws gives "all" and does not throw`; `#36 AC4: it reads only its own key, never task-tracker:v1`; `#36 AC4: an unknown remembered value starts on "all", with the stored tasks as without it`; `#36 AC4: an unknown remembered value opens on "All" with no error, and the tasks load as without it`; `#36 AC5: choosing filters and reloading leaves task-tracker:v1 unchanged` | Implemented |
 | REQ-037 | STORY-018 | — | — | Not started |
 | REQ-038 | STORY-018 | — | — | Not started |
+| REQ-039 | STORY-018 | — | — | Not started |
+| REQ-040 | STORY-018 | — | — | Not started |

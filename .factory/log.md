@@ -101,3 +101,4 @@
 2026-10-27T12:07:57Z S03 004-edit-priority-due-today architecture
 2026-10-27T12:09:34Z S04 004-edit-priority-due-today plan
 2026-10-27T12:17:21Z S05 004-edit-priority-due-today stories STORY-018..STORY-018
+2026-10-27T13:06:42Z S05 004-edit-priority-due-today revision
