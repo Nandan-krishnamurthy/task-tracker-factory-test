@@ -63,6 +63,8 @@ These do not block planning; it continues on the assumptions above. Answer at Ga
 5. What priority (Must or Should) do FR-017 and FR-018 have? (Assumed: FR-018 is planned for this increment; FR-017 is already delivered by REQ-010.)
 6. Where on the task does the "Due today" badge appear? (Assumed: next to the `Due <date>` text.)
 7. Should the badge appear or disappear straight away when a task's due date is set, changed or cleared? (Assumed: yes, as part of the same action.)
+8. REQ-037 may restate REQ-022 (Done). Is it new work? (Assumed: yes. REQ-022 labels a task "Overdue" when its due date is before today; REQ-037 adds a separate "Due today" label for a due date equal to today, which no Done requirement labels.)
+9. REQ-038 may restate REQ-022 and REQ-023 (Done). Is it new work? (Assumed: yes. REQ-022 and REQ-023 say when the "Overdue" label is or is not shown; REQ-038 says which tasks do not show the new "Due today" label, which neither covers.)
 
 ## PRD coverage
 | PRD section | Requirements |
