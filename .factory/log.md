@@ -99,3 +99,4 @@
 2026-10-27T10:34:58Z S01 004-edit-priority-due-today discovery baseline green null:lint
 2026-10-27T12:06:03Z S02 004-edit-priority-due-today requirements REQ-037..REQ-038
 2026-10-27T12:07:57Z S03 004-edit-priority-due-today architecture
+2026-10-27T12:09:34Z S04 004-edit-priority-due-today plan
