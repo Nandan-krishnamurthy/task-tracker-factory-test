@@ -375,6 +375,58 @@ describe('render overdue label', () => {
   });
 });
 
+describe('render due-today label', () => {
+  const task = (id: string, dueDate: string | null, completed = false) => ({
+    id,
+    title: `Task ${id}`,
+    dueDate,
+    priority: null,
+    completed,
+    createdAt: '',
+  });
+  const rowOf = (id: string) =>
+    [...root.querySelectorAll('#task-list li')].find(
+      (li) => li.querySelector('.task-title')!.textContent === `Task ${id}`,
+    )!;
+  const dueToday = (id: string) => rowOf(id).querySelector('.task-due-today');
+
+  it('#41 AC1: an active task due today shows "Due today" after its due date, and no "Overdue"', () => {
+    render(root, { tasks: [task('a', '2026-10-07')], validationMessage: null, today: '2026-10-07' });
+    const label = dueToday('a')!;
+    expect(label.textContent).toBe('Due today');
+    expect(label.previousElementSibling!.className).toBe('task-due');
+    expect(rowOf('a').querySelector('.task-overdue')).toBeNull();
+  });
+
+  it('#41 AC1: tasks due yesterday, tomorrow or never show no "Due today"; yesterday\'s shows "Overdue"', () => {
+    const tasks = [task('a', '2026-10-06'), task('b', '2026-10-08'), task('c', null)];
+    render(root, { tasks, validationMessage: null, today: '2026-10-07' });
+    expect(['a', 'b', 'c'].map(dueToday)).toEqual([null, null, null]);
+    expect(rowOf('a').querySelector('.task-overdue')!.textContent).toBe('Overdue');
+  });
+
+  it('#41 AC2: a completed task due today in the Completed view shows no label', () => {
+    render(root, {
+      tasks: [task('a', '2026-10-07', true)],
+      validationMessage: null,
+      view: 'completed',
+      today: '2026-10-07',
+    });
+    expect(dueToday('a')).toBeNull();
+  });
+
+  it('#41 AC5: the row\'s text holds both the title and "Due today"', () => {
+    render(root, { tasks: [task('a', '2026-10-07')], validationMessage: null, today: '2026-10-07' });
+    expect(rowOf('a').textContent).toContain('Task a');
+    expect(rowOf('a').textContent).toContain('Due today');
+  });
+
+  it('#41 AC1: without today no "Due today" label is shown', () => {
+    render(root, { tasks: [task('a', '2026-10-07')], validationMessage: null });
+    expect(dueToday('a')).toBeNull();
+  });
+});
+
 describe('priority filter', () => {
   const task = (id: string, priority: 'low' | 'medium' | 'high' | null, completed = false, dueDate: string | null = null) => ({
     id,

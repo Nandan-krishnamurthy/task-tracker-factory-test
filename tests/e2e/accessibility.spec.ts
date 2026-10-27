@@ -236,6 +236,30 @@ test.describe('overdue label', () => {
   });
 });
 
+test.describe('due-today label', () => {
+  test.beforeEach(async ({ page }) => {
+    // Today is 2026-10-07 on the device, as in the STORY-018 tests.
+    await page.clock.setFixedTime(new Date(2026, 9, 7, 10, 0));
+    await page.goto('/');
+  });
+
+  test('#41 AC5: axe reports no violations with a task due today, which is read with its title and "Due today"', async ({
+    page,
+  }) => {
+    await page.getByLabel('Task title').fill('Water plants');
+    await page.getByLabel('Due date', { exact: true }).fill('2026-10-07');
+    await page.getByLabel('Task title').press('Enter');
+    const label = list(page).locator('.task-due-today');
+    await expect(label).toHaveText('Due today');
+    const color = await label.evaluate((el) => getComputedStyle(el).color);
+    expect(contrast(color, 'rgb(255, 255, 255)')).toBeGreaterThanOrEqual(4.5);
+    await expectNoViolations(page);
+    const snapshot = await list(page).getByRole('listitem').filter({ hasText: 'Water plants' }).ariaSnapshot();
+    expect(snapshot).toContain('Water plants');
+    expect(snapshot).toContain('Due today');
+  });
+});
+
 const FILTER_CHOICES = ['All', 'High', 'Medium', 'Low', 'None'];
 const priorityFilter = (page: Page, name: string) =>
   page.getByRole('group', { name: 'Filter by priority' }).getByRole('button', { name, exact: true });
