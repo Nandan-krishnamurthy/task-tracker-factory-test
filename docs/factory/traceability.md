@@ -48,3 +48,4 @@ Status is one of: `Not started`, `In progress`, `Implemented`, `Deferred`.
 | REQ-038 | STORY-018 | — | — | Not started |
 | REQ-039 | STORY-018 | — | — | Not started |
 | REQ-040 | STORY-018 | — | — | Not started |
+| REQ-041 | STORY-018 | — | — | Not started |

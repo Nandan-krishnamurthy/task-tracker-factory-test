@@ -5,16 +5,16 @@ Stories are cut from [04-implementation-plan.md](04-implementation-plan.md), in 
 ## M1: "Due today" label, refreshed at midnight
 
 ### STORY-018: Show a "Due today" label on active tasks due today
-- Traces to: REQ-037, REQ-038, REQ-039, REQ-040
+- Traces to: REQ-037, REQ-038, REQ-039, REQ-040, REQ-041
 - Blocked by: None
 - Milestone: M1
-- Files: src/domain/task.ts (~16), src/domain/task.test.ts (~55), src/app/controller.ts (~28), src/app/controller.test.ts (~65), src/main.ts (~4), src/ui/render.ts (~10), src/ui/render.test.ts (~55), index.html (~6), tests/e2e/due-today.spec.ts (~100), tests/e2e/accessibility.spec.ts (~25), docs/factory/traceability.md (~4)
+- Files: src/domain/task.ts (~16), src/domain/task.test.ts (~55), src/app/controller.ts (~28), src/app/controller.test.ts (~72), src/main.ts (~4), src/ui/render.ts (~10), src/ui/render.test.ts (~55), index.html (~6), tests/e2e/due-today.spec.ts (~110), tests/e2e/accessibility.spec.ts (~25), docs/factory/traceability.md (~4)
 #### Story
-As an individual user, I want my active tasks that are due today to be marked "Due today", and to turn "Overdue" when the day ends, so that I can see at a glance what needs doing today without reloading the page.
+As an individual user, I want my active tasks that are due today to be marked "Due today", to turn "Overdue" when the day ends, and the next day's tasks to be marked as that day starts, so that I can see at a glance what needs doing today without reloading the page.
 #### Acceptance criteria
 - AC1: Given today is 2026-10-07 on the device, when the Active view shows active tasks due 2026-10-06, 2026-10-07 and 2026-10-08 and one with no due date, then only the task due 2026-10-07 shows the text "Due today", next to its due date, and the task due 2026-10-06 still shows "Overdue".
 - AC2: Given an active task due today that shows "Due today", when the user marks it complete, then its row in the Completed view shows no "Due today" label, and when the user reopens it, then its row in the Active view shows "Due today" again.
-- AC3: Given the app is open at 23:59 on 2026-10-07 with an active task due 2026-10-07 that shows "Due today", when the device clock passes midnight with no user action and no reload, then that task's row shows "Overdue" and no longer shows "Due today".
+- AC3: Given the app is open at 23:59 on 2026-10-07 with an active task due 2026-10-07 that shows "Due today" and an active task due 2026-10-08 that shows no label, when the device clock passes midnight with no user action and no reload, then the task due 2026-10-07 shows "Overdue" and no longer shows "Due today", and the task due 2026-10-08 shows "Due today".
 - AC4: Given an active task due today that shows "Due today", when the user edits its due date to tomorrow or clears it, then the label disappears as part of the same action; and given an active task due tomorrow, when its due date is changed to today, then the label appears.
 - AC5: Given an active task due today in the Active view, when axe scans the page (including the colour-contrast rule), then it reports no violations, and the task's accessible text includes both its title and "Due today".
 #### Out of scope
@@ -30,5 +30,5 @@ As an individual user, I want my active tasks that are due today to be marked "D
 - E2E tests use Playwright's clock API: `page.clock.install({ time })` and `page.clock.runFor(…)` for AC3, as the clock is already used in `tests/e2e/overdue.spec.ts`. Select the label by its class: `#27 AC2` in that spec has a task titled "Due today", so a lookup by text could match the title. No new dependencies.
 - If an existing assertion breaks because a row now also shows "Due today", update it and explain it in the PR (rule H3).
 #### Test plan
-- Unit: `isDueToday` for yesterday, today, tomorrow, no due date and a completed task due today; `msUntilNextMidnight` mid-day, just before and just after midnight; the controller with a fake `setTimer` schedules the next midnight, re-renders with the new `today` when the timer fires and schedules again, and schedules nothing without `setTimer`; `render` shows the label only for active tasks due today, after the due date, and none when `today` is absent.
-- End-to-end: with the clock installed at 2026-10-07, add tasks due 2026-10-06, 2026-10-07, 2026-10-08 and none, and check the labels; complete and reopen the task due today; edit its due date forwards and clear it, and edit another task's date to today; install the clock at 23:59 and run it past midnight to see "Overdue"; run axe in the Active view with the label present.
+- Unit: `isDueToday` for yesterday, today, tomorrow, no due date and a completed task due today; `msUntilNextMidnight` mid-day, just before and just after midnight; the controller with a fake `setTimer` schedules the next midnight, re-renders with the new `today` when the timer fires (a task due on the new day is then due today in the rendered state) and schedules again, and schedules nothing without `setTimer`; `render` shows the label only for active tasks due today, after the due date, and none when `today` is absent.
+- End-to-end: with the clock installed at 2026-10-07, add tasks due 2026-10-06, 2026-10-07, 2026-10-08 and none, and check the labels; complete and reopen the task due today; edit its due date forwards and clear it, and edit another task's date to today; install the clock at 23:59 on 2026-10-07 with tasks due 2026-10-07 and 2026-10-08, run it past midnight, and see "Overdue" on the first and "Due today" on the second (AC3); run axe in the Active view with the label present.

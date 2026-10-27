@@ -15,11 +15,14 @@ FR-017 states exactly what REQ-010 already delivers and names nothing beyond it.
 
 At Gate A, the reviewer asked on [Planning PR #40](https://github.com/Nandan-krishnamurthy/task-tracker-factory-test/pull/40) (`/changes`, 2026-10-27) to: show "Due today" only on active tasks, not on completed ones (REQ-037, REQ-038); change an incomplete task's label from "Due today" to "Overdue" automatically after midnight, without a page refresh (REQ-039); update the label immediately when the task's due date is changed or cleared (REQ-040); keep FR-017 out of scope, because REQ-010 already implements priority editing; and keep the overlap findings for REQ-022 and REQ-023 (Open questions 8 and 9). That answers the change request's Open questions 1, 2, 3 and 7.
 
+In a second `/changes` on PR #40 (2026-10-27), the reviewer answered Open question 10 **yes**: when midnight arrives, an active task whose due date has just become today automatically shows "Due today" (REQ-041). STORY-018's acceptance criteria now test both midnight behaviours: the task that was due today becomes "Overdue", and the task due on the new day starts showing "Due today", without a page refresh.
+
 ## Functional
 - **REQ-037** (PRD §Functional requirements FR-018, §Goals; Gate A feedback on PR #40): An active (not completed) task whose due date is today's date (the device's local calendar date) shows a visible text label "Due today".
 - **REQ-038** (PRD §Functional requirements FR-018; Gate A feedback on PR #40): A completed task, and a task whose due date is earlier or later than today's date or that has no due date, shows no "Due today" label.
 - **REQ-039** (PRD §Open questions 3; Gate A feedback on PR #40): While the app stays open, when the device's local date passes midnight, an active task that showed "Due today" shows "Overdue" instead, without a page reload or any user action.
 - **REQ-040** (PRD §Open questions 7; Gate A feedback on PR #40): When the due date of a task is set, changed or cleared (REQ-009), its "Due today" label appears or disappears to match the new date as part of the same action, without a page reload.
+- **REQ-041** (Open question 10; second Gate A feedback on PR #40): While the app stays open, when the device's local date passes midnight, an active task whose due date has just become today shows "Due today", without a page reload or any user action.
 
 ## Non-functional
 None. The change request states no non-functional requirement. The existing ones stay in force for the new label: keyboard use and accessible names (REQ-016, REQ-017), no network requests (REQ-018) and changes within 100 ms with 500 tasks (REQ-019).
@@ -27,7 +30,7 @@ None. The change request states no non-functional requirement. The existing ones
 ## Changed or retired requirements
 - REQ-022: changed by REQ-039 (the "Overdue" label of an active task whose due date has just passed now appears at local midnight while the app stays open, without waiting for the next user action; 002-add-due-dates' assumption and decision 4, "refresh on render, not on a timer", are superseded).
 - REQ-010 stays in force unchanged (FR-017 is already delivered by it). REQ-023 also stays: a task due today still shows no "Overdue" label, and an active one gets the separate "Due today" label instead. REQ-024 stays: a completed task shows neither label.
-- 002-add-due-dates' out-of-scope item "A 'Due today' … label" is superseded, by REQ-037 to REQ-040.
+- 002-add-due-dates' out-of-scope item "A 'Due today' … label" is superseded, by REQ-037 to REQ-041.
 
 ## Unchanged behaviour to protect
 The stories must keep these tests passing:
@@ -50,9 +53,9 @@ The change request left these details open (its Open questions 1–7); the Gate 
 - **Views and completed tasks** (answered): only active tasks show the label, so it appears in the Active view only; completed tasks never show it, like "Overdue" (REQ-024). Reopening a completed task due today shows it again, because it is then an active task due today (REQ-037).
 - **Placement** (Open question 6): next to the existing `Due <date>` text, where "Overdue" goes.
 - **Assistive technology** (Open question 4): the label is text that is part of the task's content, like "Overdue" (002 decision 5); no other announcement is added.
-- **Midnight** (answered): the app refreshes "today" at each local midnight while it stays open (REQ-039). The refresh recomputes every row's labels, not only the ones that showed "Due today" (Open question 10).
+- **Midnight** (answered): the app refreshes "today" at each local midnight while it stays open. The refresh recomputes every row's labels: a task that was due today becomes "Overdue" (REQ-039), and a task due on the new day starts showing "Due today" (REQ-041; Open question 10, answered).
 - **Immediate updates** (answered): REQ-040.
-- **Priority** (Open question 5): the change request does not say Must or Should. REQ-037 to REQ-040 are planned for this increment.
+- **Priority** (Open question 5): the change request does not say Must or Should. REQ-037 to REQ-041 are planned for this increment.
 - The labels are derived when rendering and never stored, so no data migration is needed.
 
 ## Out of scope
@@ -71,14 +74,14 @@ These do not block planning; it continues on the assumptions above. Answer at Ga
 7. Should the badge appear or disappear straight away when a task's due date is set, changed or cleared? (Answered at Gate A on PR #40: yes; REQ-040.)
 8. REQ-037 may restate REQ-022 (Done). Is it new work? (Assumed: yes. REQ-022 labels a task "Overdue" when its due date is before today; REQ-037 adds a separate "Due today" label for a due date equal to today, which no Done requirement labels.)
 9. REQ-038 may restate REQ-022 and REQ-023 (Done). Is it new work? (Assumed: yes. REQ-022 and REQ-023 say when the "Overdue" label is or is not shown; REQ-038 says which tasks do not show the new "Due today" label, which neither covers.)
-10. Should the midnight refresh (REQ-039) also update the other labels at midnight, so that an active task due tomorrow starts showing "Due today"? (Assumed: yes. The refresh reads today's date again for the whole list, so every row shows the labels for the new date.)
+10. Should the midnight refresh (REQ-039) also update the other labels at midnight, so that an active task due tomorrow starts showing "Due today"? (Answered at Gate A on PR #40, second `/changes`: yes; REQ-041.)
 11. REQ-038 may restate REQ-024 (Done). Is it new work? (Assumed: yes. REQ-024 says a completed task shows no "Overdue" label; REQ-038 says a completed task, or one not due today, shows no "Due today" label, which REQ-024 does not cover.)
 12. REQ-040 may restate REQ-025 (Done). Is it new work? (Assumed: yes. REQ-025 makes the "Overdue" label follow due-date edits; REQ-040 makes the new "Due today" label follow them in the same way, which REQ-025 does not cover.)
 
 ## PRD coverage
 | PRD section | Requirements |
 |---|---|
-| Change request: Edit a task's priority, and show a "Due today" badge | REQ-037, REQ-038, REQ-039, REQ-040 (editing a task's priority: Out of scope, already delivered by REQ-010) |
+| Change request: Edit a task's priority, and show a "Due today" badge | REQ-037, REQ-038, REQ-039, REQ-040, REQ-041 (editing a task's priority: Out of scope, already delivered by REQ-010) |
 | Problem | REQ-037, REQ-038 (the request it quotes; editing a task's priority: Out of scope, REQ-010) |
 | Goals | REQ-037, REQ-038 ("Allow editing a task's priority": Out of scope, already delivered by REQ-010) |
 | Non-goals | Out of scope (the change request states none) |
@@ -89,4 +92,4 @@ These do not block planning; it continues on the assumptions above. Answer at Ga
 | Verified constraints | REQ-037, REQ-038 (existing REQ-003, REQ-004, REQ-022, REQ-023) |
 | Assumptions requiring validation | Out of scope (the change request states none) |
 | Decisions | Out of scope (the change request states none) |
-| Open questions | REQ-037, REQ-038, REQ-039, REQ-040 (questions 1, 2, 3 and 7 answered at Gate A on PR #40) |
+| Open questions | REQ-037, REQ-038, REQ-039, REQ-040, REQ-041 (questions 1, 2, 3, 7 and 10 answered at Gate A on PR #40) |
