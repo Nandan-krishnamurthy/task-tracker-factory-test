@@ -56,6 +56,17 @@ export function isOverdue(task: Task, today: string): boolean {
   return !task.completed && task.dueDate !== null && task.dueDate < today;
 }
 
+/** An open task whose due date is `today` (`YYYY-MM-DD`); never true together with `isOverdue`. */
+export function isDueToday(task: Task, today: string): boolean {
+  return !task.completed && task.dueDate !== null && task.dueDate === today;
+}
+
+/** Milliseconds from `now` to the next local midnight, from local parts, so DST cannot shift it. */
+export function msUntilNextMidnight(now: Date): number {
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return midnight.getTime() - now.getTime();
+}
+
 export type CreateResult =
   | { ok: true; tasks: Task[]; task: Task }
   | { ok: false; error: string };

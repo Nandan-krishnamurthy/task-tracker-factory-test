@@ -26,6 +26,10 @@ const controller = createController({
   render: (state) => render(main, state),
   now: () => new Date(),
   newId,
+  setTimer: (callback, ms) => {
+    const id = setTimeout(callback, ms);
+    return () => clearTimeout(id);
+  },
 });
 render(main, controller.state());
 bindEvents(main, controller);

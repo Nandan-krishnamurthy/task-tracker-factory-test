@@ -3,6 +3,7 @@ import {
   createTask,
   deleteTask,
   localDate,
+  msUntilNextMidnight,
   setCompleted,
   updateTask,
   type NewTask,
@@ -38,6 +39,11 @@ export interface ControllerDeps {
   render: (state: AppState) => void;
   now: () => Date;
   newId: () => string;
+  /**
+   * Starts a timer and returns a function that cancels it. When given, the labels are
+   * refreshed at each local midnight (REQ-039, REQ-041); without it, nothing is scheduled.
+   */
+  setTimer?: (callback: () => void, ms: number) => () => void;
 }
 
 export interface Controller {
@@ -67,6 +73,7 @@ export function createController({
   render,
   now,
   newId,
+  setTimer,
 }: ControllerDeps): Controller {
   // The app always opens on Active (the view is not stored), with the remembered
   // priority filter, or every priority when none is remembered (REQ-027, REQ-035).
@@ -95,6 +102,17 @@ export function createController({
     current = { ...next, today: localDate(now()) };
     render(current);
   }
+
+  // One timer at the next local midnight, then the next, so "today" moves on while the app
+  // stays open (architecture decision 5). The refresh reads the real date from now(), so a
+  // timer that fires late still shows the right labels.
+  function scheduleMidnight(): void {
+    setTimer?.(() => {
+      update({ ...current });
+      scheduleMidnight();
+    }, msUntilNextMidnight(now()));
+  }
+  scheduleMidnight();
 
   return {
     addTask(title, details = {}) {

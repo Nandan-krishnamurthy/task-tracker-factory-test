@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TITLE_REQUIRED } from '../domain/task';
+import { isDueToday, isOverdue, type Task } from '../domain/task';
 import { FILTER_KEY, loadPriorityFilter } from '../storage/filterStore';
 import { loadTasks, STORAGE_KEY } from '../storage/taskStore';
 import { createController, SAVE_WARNING, type AppState } from './controller';
@@ -320,6 +321,71 @@ describe('controller today', () => {
     clock = new Date(2026, 9, 8, 0, 1);
     controller.addTask('Pay rent', { dueDate: '2026-10-07' });
     expect(render).toHaveBeenLastCalledWith(expect.objectContaining({ today: '2026-10-08' }));
+  });
+});
+
+describe('controller midnight refresh', () => {
+  const task = (id: string, dueDate: string): Task => ({
+    id,
+    title: id,
+    dueDate,
+    priority: null,
+    completed: false,
+    createdAt: '2026-10-01T09:00:00.000Z',
+  });
+
+  /** A hand-driven setTimer: records each timer so the test can fire it. */
+  function fakeTimers() {
+    const timers: { callback: () => void; ms: number; cancelled: boolean }[] = [];
+    const setTimer = (callback: () => void, ms: number) => {
+      const timer = { callback, ms, cancelled: false };
+      timers.push(timer);
+      return () => {
+        timer.cancelled = true;
+      };
+    };
+    return { timers, setTimer };
+  }
+
+  it('#41 AC3: at local midnight the old day\'s task turns overdue and the new day\'s is due today', () => {
+    let clock = new Date(2026, 9, 7, 23, 59);
+    const render = vi.fn<(state: AppState) => void>();
+    const storage = { setItem: vi.fn() };
+    const { timers, setTimer } = fakeTimers();
+    const controller = createController({
+      tasks: [task('old-day', '2026-10-07'), task('new-day', '2026-10-08')],
+      storage,
+      render,
+      now: () => clock,
+      newId: () => 'id-1',
+      setTimer,
+    });
+    // One timer, set for the next local midnight, one minute away.
+    expect(timers.map((t) => t.ms)).toEqual([60_000]);
+    const before = controller.state();
+    expect(before.tasks.filter((t) => isDueToday(t, before.today!)).map((t) => t.id)).toEqual(['old-day']);
+
+    clock = new Date(2026, 9, 8, 0, 0);
+    timers[0].callback();
+    const after = controller.state();
+    expect(render).toHaveBeenLastCalledWith(after);
+    expect(after.today).toBe('2026-10-08');
+    expect(after.tasks.filter((t) => isOverdue(t, after.today!)).map((t) => t.id)).toEqual(['old-day']);
+    expect(after.tasks.filter((t) => isDueToday(t, after.today!)).map((t) => t.id)).toEqual(['new-day']);
+    // The refresh changes no data, so nothing is saved, and the next midnight is scheduled.
+    expect(storage.setItem).not.toHaveBeenCalled();
+    expect(timers).toHaveLength(2);
+    expect(new Date(clock.getTime() + timers[1].ms).getDate()).toBe(9);
+  });
+
+  it('#41 AC3: without setTimer no timer is started', () => {
+    vi.useFakeTimers();
+    try {
+      setup();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

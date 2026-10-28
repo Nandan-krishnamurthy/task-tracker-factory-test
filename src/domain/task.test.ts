@@ -5,8 +5,10 @@ import {
   INVALID_DUE_DATE,
   INVALID_PRIORITY,
   isCalendarDate,
+  isDueToday,
   isOverdue,
   localDate,
+  msUntilNextMidnight,
   TITLE_REQUIRED,
   updateTask,
   validateTitle,
@@ -217,5 +219,42 @@ describe('localDate and isOverdue', () => {
 
   it('#27 AC3: a completed task is never overdue', () => {
     expect(isOverdue(task('2026-10-06', true), '2026-10-07')).toBe(false);
+  });
+});
+
+describe('isDueToday and msUntilNextMidnight', () => {
+  const task = (dueDate: string | null, completed = false): Task => ({
+    id: 'a',
+    title: 'Pay rent',
+    dueDate,
+    priority: null,
+    completed,
+    createdAt: '',
+  });
+
+  it('#41 AC1: an open task due today is due today, and never overdue at the same time', () => {
+    expect(isDueToday(task('2026-10-07'), '2026-10-07')).toBe(true);
+    expect(isOverdue(task('2026-10-07'), '2026-10-07')).toBe(false);
+  });
+
+  it('#41 AC1: a task due before or after today, or with no due date, is not due today', () => {
+    expect(isDueToday(task('2026-10-06'), '2026-10-07')).toBe(false);
+    expect(isDueToday(task('2026-10-08'), '2026-10-07')).toBe(false);
+    expect(isDueToday(task(null), '2026-10-07')).toBe(false);
+  });
+
+  it('#41 AC2: a completed task due today is not due today', () => {
+    expect(isDueToday(task('2026-10-07', true), '2026-10-07')).toBe(false);
+  });
+
+  it('#41 AC3: the delay ends exactly at the next local midnight, just before, at noon and just after', () => {
+    expect(msUntilNextMidnight(new Date(2026, 9, 7, 23, 59))).toBe(60_000);
+    for (const now of [new Date(2026, 9, 7, 23, 59, 59), new Date(2026, 9, 7, 12), new Date(2026, 9, 7, 0, 0, 1)]) {
+      const next = new Date(now.getTime() + msUntilNextMidnight(now));
+      expect([next.getFullYear(), next.getMonth(), next.getDate(), next.getHours(), next.getMinutes()]).toEqual([
+        2026, 9, 8, 0, 0,
+      ]);
+      expect(next.getSeconds() + next.getMilliseconds()).toBe(0);
+    }
   });
 });
