@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { isDueToday, isOverdue, TITLE_REQUIRED, type Task } from '../domain/task';
+import { TITLE_REQUIRED } from '../domain/task';
+import { isDueToday, isOverdue, type Task } from '../domain/task';
 import { FILTER_KEY, loadPriorityFilter } from '../storage/filterStore';
 import { loadTasks, STORAGE_KEY } from '../storage/taskStore';
 import { createController, SAVE_WARNING, type AppState } from './controller';
